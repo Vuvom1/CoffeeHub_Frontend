@@ -1,67 +1,108 @@
-import React, { useState } from 'react';
-import { Button, Flex, Menu, Modal, Switch, Table, Typography } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Button, Flex, Menu, Modal, Switch, Table, Typography, App, Tag } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import endpoints from '../../../contants/Endpoint';
+import apiEndpoints from '../../../contants/ApiEndpoints';
+import apiInstance from '../../../services/api';
+import { message } from 'antd';
+import orderStatus from '../../../contants/OrderStatus';
 
 const { SubMenu } = Menu;
 
-const dataSource = [
-    {
-        key: '1',
-        orderNumber: '12345',
-        customerName: 'John Doe',
-        status: 'Pending',
-    },
-    {
-        key: '2',
-        orderNumber: '67890',
-        customerName: 'Jane Smith',
-        status: 'Completed',
-    },
-];
 
-const columns = [
-    {
-        title: 'Order Number',
-        dataIndex: 'orderNumber',
-        key: 'orderNumber',
-    },
-    {
-        title: 'Customer Name',
-        dataIndex: 'customerName',
-        key: 'customerName',
-    },
-    {
-        title: 'Status',
-        dataIndex: 'status',
-        key: 'status',
-    },
-    {
-        title: 'Available',
-        dataIndex: 'available',
-        key: 'available',
-        render: (text) => <Switch checkedChildren="Yes" unCheckedChildren="No" defaultChecked={text} />,
-    },
-    {
-        key: 'action',
-        render: (text, record) => (
-            <Flex justify="center">
-                <Button type="link">
-                    <SettingOutlined />
-                </Button>
-            </Flex>
-        ),
-    }
-];
 
 const Order = () => {
     const navigate = useNavigate();
+    const {message} = App.useApp();
+
+    const [orders, setOrders] = useState([]);
 
     const [isModalAddOrderVisible, setIsModalAddOrderVisible] = useState(false);
     const [isModalEditOrderVisible, setIsModalEditOrderVisible] = useState(false);
     const [isModalAddCategoryVisible, setIsModalAddCategoryVisible] = useState(false);
     const [current, setCurrent] = useState('mail');
+    
+    const navigateOrderDetail = (orderId) => {
+        navigate(endpoints.admin.orderDetail(orderId));
+    }
+
+    const columns = [
+        {
+            title: 'ID',
+            dataIndex: 'id',
+            key: 'id',
+        },
+        {
+            title: 'Date and Time',
+            dataIndex: 'orderDate',
+            key: 'orderDate',
+            render: (text) => {
+                return new Date(text).toLocaleString();
+            }
+        },
+        
+        {
+            title: 'Total Amount',
+            dataIndex: 'totalAmount',
+            key: 'totalAmount',
+            render: (text) => {
+                return text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+            }
+        },
+        {
+            title: 'Final Amount',
+            dataIndex: 'finalAmount',
+            key: 'finalAmout',
+            render: (text) => {
+                return text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
+            }
+        },
+        {
+            title: 'Card Number',
+            dataIndex: 'orderCardNumber',
+            key: 'orderCardNumber',
+        },
+        {
+            title: 'Status',
+            dataIndex: 'status',
+            key: 'status',
+            render: (text) => {
+                switch (text) {
+                    case orderStatus.Pending:
+                        return <Tag color='yellow'>{text}</Tag>
+                    case orderStatus.Preparing:
+                        return <Tag color='blue'>{text}</Tag>
+                    case orderStatus.ReadyForPickup:
+                        return <Tag color='purple'>{text}</Tag>
+                    case orderStatus.Completed:
+                        return <Tag color='green'>{text}</Tag>
+                    case orderStatus.Cancelled:
+                        return <Tag color='red'>{text}</Tag>
+                    default:
+                        return <Tag color='orange'>{text}</Tag>
+                }
+            }
+        },
+        {
+            key: 'action',
+            render: (text, record) => (
+                <Flex justify="center">
+                    <Button type="link">
+                        <SettingOutlined onClick={()=>navigateOrderDetail(record.id)} />
+                    </Button>
+                </Flex>
+            ),
+        }
+    ];
+
+    const fetchOrders = async () => {
+        await apiInstance.get(apiEndpoints.admin.order.getAll).then((response) => {
+            setOrders(response.data.$values);
+        }).catch((error) => {
+            message.error(error.response.data);
+        });
+    }
 
     const handleClick = e => {
         console.log('click ', e);
@@ -97,6 +138,11 @@ const Order = () => {
         setIsModalAddCategoryVisible(false);
     };
 
+    useEffect(() => {
+        fetchOrders();
+    }
+    , []);
+
     return (
         <>
             <Flex vertical style={{ justifyContent: 'space-between', alignItems: 'start' }}>
@@ -128,20 +174,9 @@ const Order = () => {
                 scroll={{ y: '60vh' }}
                 sticky={true}
                 style={{ width: '100%' }}
-                dataSource={dataSource}
+                dataSource={orders}
                 columns={columns}
                 pagination={{}} />
-
-            {/* <Modal title="Add New Order" open={isModalAddOrderVisible} onOk={handleOk} onCancel={handleCancel}>
-                <AddOrder />
-            </Modal>
-            <Modal title="Edit Order" open={isModalEditOrderVisible} onOk={handleOk} onCancel={handleCancel}>
-                <AddOrder />
-            </Modal>
-            <Modal title="Add New Category" open={isModalAddCategoryVisible} onOk={handleOk} onCancel={handleCancel}>
-                <AddOrderCategory />
-            </Modal>  */}
-
         </>
     );
 };

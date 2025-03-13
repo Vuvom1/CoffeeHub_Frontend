@@ -27,9 +27,14 @@ const apiEndpoints = {
         customer: {
             getAll: 'Customer',
             getByPhoneNumber: (phone) => `Customer/phone/${phone}`,
+            getById: (id) => `Customer/${id}`,
+            update: (id) => `Customer/${id}`,
         },
         order: {
             getAll: 'Order',
+            getById: (id) => `Order/${id}`,
+            add: 'Order',
+            update: (id) => `Order/${id}`,
         },
         menuItem: {
             getAll: 'MenuItem',
@@ -81,6 +86,7 @@ const apiEndpoints = {
             getById: (id) => `Promotion/${id}`,
             add: 'Promotion',
             update: (id) => `Promotion/${id}`,
+            updateActivation: (id) => `Promotion/activation/${id}`,
             delete: 'Promotion',
         },
         image: {

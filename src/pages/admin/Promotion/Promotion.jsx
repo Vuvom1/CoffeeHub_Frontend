@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Flex, Menu, Modal, Switch, Table, Typography, message } from 'antd';
+import { App, Button, Flex, Menu, Modal, Switch, Table, Typography, message } from 'antd';
 import { MoreOutlined, PlusOutlined } from '@ant-design/icons';
 import apiEndpoints from '../../../contants/ApiEndpoints';
 import apiInstance from '../../../services/api';
@@ -11,13 +11,20 @@ import EditPromotion from './EditPromotion';
 const { SubMenu } = Menu;
 
 const Promotion = () => {
+    const {message} = App.useApp();
     const navigate = useNavigate();
     const [promotions, setPromotions] = useState([]);
     const [isModalAddPromotionVisible, setIsModalAddPromotionVisible] = useState(false);
     const [modalPromotionEditId, setModalPromotionEditId] = useState(null);  
 
-    const navigatePromotionDetails = (id) => () => {
-        navigate(endpoints.admin.promotionDetails(id));
+    const handleUpdateActivation = async (id, isActive) => {
+        await apiInstance.put(apiEndpoints.admin.promotion.updateActivation(id), isActive).then((response) => {
+            message.success(response.data);
+        }).catch((error) => {
+            message.error(error.response.data);
+            console.log(error.response.data);
+        }
+        );
     }
 
     const columns = [
@@ -52,8 +59,8 @@ const Promotion = () => {
             title: 'IsActive',
             dataIndex: 'isActive',
             key: 'isActive',
-            render: (text) => {
-                return <Switch checkedChildren="Yes" unCheckedChildren="No" defaultChecked={text} />
+            render: (text, record) => {
+                return <Switch checkedChildren="Yes" unCheckedChildren="No" onChange={()=>handleUpdateActivation(record.id, !text)} defaultChecked={text} />
             }
         },
         {
@@ -114,7 +121,7 @@ const Promotion = () => {
             <Modal width={800} title="Add New Promotion" open={isModalAddPromotionVisible} footer={null} onOk={handleOk} onCancel={handleCancel}>
                 <AddPromotion onSave={handleOk} />
             </Modal>
-            <Modal width={800} title="Edit Promotion" open={modalPromotionEditId} onOk={handleOk} onCancel={handleCancel}>
+            <Modal width={800} title="Edit Promotion" footer={null} open={modalPromotionEditId} onOk={handleOk} onCancel={handleCancel}>
                 <EditPromotion promotionId={modalPromotionEditId} onSave={handleOk} />
             </Modal>
         </>

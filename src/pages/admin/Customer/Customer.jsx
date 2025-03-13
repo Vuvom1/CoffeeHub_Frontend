@@ -1,33 +1,26 @@
-import React, { useState } from 'react';
+import React, { use, useEffect, useState } from 'react';
 import { Button, Flex, Menu, Modal, Table, Typography } from 'antd';
+import apiEndpoints from '../../../contants/ApiEndpoints';  
+import apiInstance from '../../../services/api';
+import { ProfileOutlined } from '@ant-design/icons';
+import moment from 'moment';
+import endpoints from '../../../contants/Endpoint';
+import { useNavigate } from 'react-router-dom';
 
 const { SubMenu } = Menu;
 
-const dataSource = [
-    {
-        key: '1',
-        name: 'John Doe',
-        email: 'john.doe@example.com',
-        phone: '123-456-7890',
-    },
-    {
-        key: '2',
-        name: 'Jane Smith',
-        email: 'jane.smith@example.com',
-        phone: '098-765-4321',
-    },
-    {
-        key: '3',
-        name: 'Alice Johnson',
-        email: 'alice.johnson@example.com',
-        phone: '555-555-5555',
-    },
-];
-
 const Customer = () => {
+    const [customers, setCustomers] = useState([]);
+    const navigate = useNavigate();
+
     const [isModalAddCustomerVisible, setIsModalAddCustomerVisible] = useState(false);
     const [isModalEditCustomerVisible, setIsModalEditCustomerVisible] = useState(false);
     const [current, setCurrent] = useState('mail');
+
+    const handleNavigateToProfile = (id) => {
+        console.log(id);
+        navigate(endpoints.admin.customerProfile(id));
+    }
 
     const columns = [
         {
@@ -36,26 +29,47 @@ const Customer = () => {
             key: 'name',
         },
         {
-            title: 'Email',
-            dataIndex: 'email',
-            key: 'email',
+            title: 'Username',
+            dataIndex: 'auth',
+            key: 'auth',
+            render: (text) => text.username ? text.username : 'N/A'
         },
         {
             title: 'Phone',
-            dataIndex: 'phone',
-            key: 'phone',
+            dataIndex: 'phoneNumber',
+            key: 'phoneNumber',
+        },
+        {
+            title: 'Point',
+            dataIndex: 'point',
+            key: 'point',
+        },
+        {
+            title: 'Level',
+            dataIndex: 'customerLevel',
+            key: 'customerLevel',
         },
         {
             key: 'action',
-            render: (text, record) => (
+            render: (_, record) => (
                 <Flex justify="center">
                     <Button type="link" onClick={showModalEditCustomer}>
-                        Edit
+                        <ProfileOutlined onClick={()=>handleNavigateToProfile(record.id)} />
                     </Button>
                 </Flex>
             ),
         }
     ];
+
+    const fetchCustomers = async () => { 
+        await apiInstance.get(apiEndpoints.admin.customer.getAll).then((response) => {
+            setCustomers(response.data.$values);
+        }
+        ).catch((error) => {
+            message.error(error.response.data);
+        }
+        );
+    }
 
     const handleClick = e => {
         console.log('click ', e);
@@ -80,12 +94,17 @@ const Customer = () => {
         setIsModalEditCustomerVisible(false);
     };
 
+    useEffect(() => {
+        fetchCustomers();
+    }
+    , []);
+
     return (
         <>
             <Flex vertical style={{ justifyContent: 'space-between', alignItems: 'start' }}>
                 <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>Customer Management</Typography.Title>
-                    <Button type="primary" onClick={showModalAddCustomer}>Add Customer</Button>
+                    {/* <Button type="primary" onClick={showModalAddCustomer}>Add Customer</Button> */}
                 </Flex>
                 <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Menu
@@ -110,7 +129,7 @@ const Customer = () => {
                 scroll={{ y: '60vh' }}
                 sticky={true}
                 style={{ width: '100%' }}
-                dataSource={dataSource}
+                dataSource={customers}
                 columns={columns}
                 pagination={{}} />
 

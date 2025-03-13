@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Select, DatePicker, Flex, Typography, Card, Row, Col, Image, Divider, Collapse, Radio, message, Descriptions } from 'antd';
+import { App, Form, Input, Button, Select, DatePicker, Flex, Typography, Card, Row, Col, Image, Divider, Collapse, Radio, message, Descriptions, InputNumber } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import apiInstance from '../../../services/api';
 import endpoints from '../../../contants/Endpoint';
 import apiEndpoints from '../../../contants/ApiEndpoints';
+import PaymentMethod from '../../../contants/PaymentMethod';
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -18,6 +19,8 @@ const panelHeaderStyle = {
 const CreateOrder = () => {
     const [form] = Form.useForm();
     const [menuItems, setMenuItems] = useState([]);
+    const { message } = App.useApp();
+    const navigate = useNavigate();
 
     const [totalItems, setTotalItems] = useState(0);
     const [subtotal, setSubtotal] = useState(0);
@@ -41,7 +44,6 @@ const CreateOrder = () => {
 
     const fetchCustomerByPhoneNumber = async () => {
         const phoneNumber = form.getFieldValue('phoneNumber');
-        console.log(phoneNumber)
         await apiInstance.get(apiEndpoints.admin.customer.getByPhoneNumber(phoneNumber))
             .then((response) => {
                 setCustomer(response.data);
@@ -51,6 +53,31 @@ const CreateOrder = () => {
                 console.error(error);
             });
     };
+
+    const handleCreateOrder = async () => {
+        const values = form.getFieldsValue();
+        const order = {
+            employeeId: '916b633f-9167-4823-84cc-6e43795f0fc2',
+            customerId: values.customerId,
+            paymentMethod: values.paymentMethod,
+            orderDetails: selectedItems.map((item) => ({
+                menuItemId: item.id,
+                quantity: item.quantity
+            })),
+            note: values.note,
+            orderCardNumber: values.orderCardNumber
+        };
+
+        await apiInstance.post(apiEndpoints.admin.order.add, order)
+            .then((response) => {
+                message.success('Order created successfully');
+                navigate(endpoints.admin.order);
+            })
+            .catch((error) => {
+                console.error(error);
+                message.error('Failed to create order');
+            });
+    }
 
     const handleSelectItem = (item) => {
         if (selectedItems.includes(item)) {
@@ -112,9 +139,9 @@ const CreateOrder = () => {
         handleCalculateTotal();
     }
         , [selectedItems]);
-        
+
     return (
-        <Form align='start' layout='vertical' style={{ height: '100%', paddingBottom: 16 }} form={form}>
+        <Form align='start' onFinish={handleCreateOrder} layout='vertical' style={{ height: '100%', paddingBottom: 16 }} form={form}>
             <Typography.Title level={2}>Create Order</Typography.Title>
             <Flex style={{ width: '100%', height: '100%' }}>
                 <Row gutter={16} style={{ width: '100%' }}>
@@ -129,7 +156,7 @@ const CreateOrder = () => {
                                             <Card >
                                                 <Row gutter={16} >
                                                     <Col span={6}>
-                                                        <Image height={100} width={100} src={item.imageUrl} />
+                                                        <Image style={{ maxWidth: '100%' }} height={100} width={100} src={item.imageUrl} />
                                                     </Col>
                                                     <Col span={14} offset={4} style={{ textAlign: 'start' }}>
                                                         <Row gutter={16} justify={'space-between'}>
@@ -158,7 +185,7 @@ const CreateOrder = () => {
                             <Collapse defaultActiveKey={['2']}>
                                 <Panel header={<div style={panelHeaderStyle}>Personal Information</div>} key="1">
 
-                                    <Form.Item label="Phone Number" name="phoneNumber" rules={[{ required: true, message: 'Please input your phone number!' }]}>
+                                    <Form.Item label="Phone Number" name="phoneNumber">
                                         <Flex>
                                             <Input placeholder="Enter your phone number" />
                                             <Button type='primary' onClick={fetchCustomerByPhoneNumber}>Search</Button>
@@ -186,34 +213,38 @@ const CreateOrder = () => {
                                     <Form.Item label="Payment Method" name="paymentMethod" rules={[{ required: true, message: 'Please select a payment method!' }]}>
                                         <Radio.Group buttonStyle="solid" style={{ width: '100%' }}>
                                             <Card >
-                                                <Row gutter={16}>
-                                                    <Col span={12} style={{ textAlign: 'start' }}>
-                                                        <Typography.Text strong>Credit Card</Typography.Text>
-                                                    </Col>
-                                                    <Col span={8}>
 
-                                                    </Col>
-                                                    <Col span={4}>
-                                                        <Radio value="creditCard" />
-                                                    </Col>
-                                                </Row>
-                                                <Divider />
-                                                <Row gutter={16}>
-                                                    <Col span={12} style={{ textAlign: 'start' }}>
-                                                        <Typography.Text strong>Bank Transfer</Typography.Text>
-                                                    </Col>
-                                                    <Col span={8}>
-
-                                                    </Col>
-                                                    <Col span={4}>
-                                                        <Radio value="bankTransfer" />
-                                                    </Col>
-                                                </Row>
+                                                {
+                                                    Object.values(PaymentMethod).map((method, index) => (
+                                                        <>
+                                                        <Row gutter={16}>
+                                                            <Col span={12} style={{ textAlign: 'start' }}>
+                                                                <Typography.Text strong>Credit Card</Typography.Text>
+                                                            </Col>
+                                                            <Col span={8}></Col>
+                                                            <Col span={4}>
+                                                                <Radio value={index} />
+                                                            </Col>
+                                                        </Row>
+                                                        <Divider />
+                                                        </>
+                                                    ))
+                                                }
                                             </Card>
                                         </Radio.Group>
                                     </Form.Item>
 
                                 </Panel>
+                                <Panel header={<div style={panelHeaderStyle}>Additional Detail</div>} key="3">
+
+                                    <Form.Item layout='horizontal' label="Order Card Number" name="orderCardNumber" rules={[{ required: true, message: 'Please select a payment method!' }]}>
+                                        <InputNumber placeholder="Enter order card number" />
+                                    </Form.Item>
+                                    <Form.Item label='Note' name='note'>
+                                        <Input.TextArea placeholder='Enter note' />
+                                    </Form.Item>
+                                </Panel>
+
                             </Collapse>
                         </Col>
                     )}
@@ -224,7 +255,7 @@ const CreateOrder = () => {
                                     {selectedItems.map((item, index) => (
                                         <Row style={{ marginBottom: 16 }} key={index}>
                                             <Col span={6}>
-                                                <Image height={100} width={100} src={item.imageUrl} />
+                                                <Image height={'100%'} width={'100%'} src={item.imageUrl} />
                                             </Col>
                                             <Col span={16} offset={1} style={{ textAlign: 'start' }}>
                                                 <Row gutter={16} justify={'space-between'}>
@@ -279,7 +310,7 @@ const CreateOrder = () => {
                                         )}
                                         {step === 2 && (<>
                                             <Button type='default' size='large' style={{ width: '100%' }} onClick={handlePreviousStep}>Previous</Button>
-                                            <Button size='large' type='primary' style={{ width: '100%', marginTop: 10 }}>Confirm</Button>
+                                            <Button size='large' htmlType='submit' type='primary' style={{ width: '100%', marginTop: 10 }}>Confirm</Button>
                                         </>
                                         )}
                                     </Row>

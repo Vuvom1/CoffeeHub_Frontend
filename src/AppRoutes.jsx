@@ -76,7 +76,7 @@ const AppRoutes = () => (
         </Route>
         <Route path='customer'  >
           <Route index element={<Customer />} />
-          <Route path=':id' element={<CustomerProfile />} />
+          <Route path='profile/:id' element={<CustomerProfile />} />
         </Route>
         <Route path='promotion' >
           <Route index element={<Promotion />} />
