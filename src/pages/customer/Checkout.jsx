@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { Table, Button, InputNumber, Row, Col, Card, Typography, Divider, Radio } from 'antd';
 import { Form, Select, Input } from 'antd';
 import { Collapse } from 'antd';
-
-const { Option } = Select;
-const { Item } = Form;
+import { useSelector } from 'react-redux';
 
 const Checkout = () => {
+    const totalAmount = useSelector((state) => state.cart.totalAmount);
+    const totalItems = useSelector((state) => state.cart.totalItems);
+
+    const [shippingFee, setShippingFee] = useState(0);
 
     const { Panel } = Collapse;
 
@@ -14,6 +16,10 @@ const Checkout = () => {
         border: 'none',
         fontWeight: 'bold',
         textAlign: 'start'
+    };
+
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
     };
 
     return (
@@ -46,7 +52,7 @@ const Checkout = () => {
                     <Panel header={<div style={panelHeaderStyle}>Payment Method</div>} key="3">
                         <Form layout="vertical">
                             <Form.Item label="Payment Method" name="paymentMethod" rules={[{ required: true, message: 'Please select a payment method!' }]}>
-                                <Radio.Group  buttonStyle="solid">
+                                <Radio.Group buttonStyle="solid">
                                     <Radio value="creditCard">Credit Card</Radio>
                                     <Radio value="paypal">PayPal</Radio>
                                     <Radio value="bankTransfer">Bank Transfer</Radio>
@@ -60,10 +66,10 @@ const Checkout = () => {
                 <Card>
                     <Row>
                         <Col span={12} align='start'>
-                            <Typography.Text style={{ textAlign: 'start' }}>Total item</Typography.Text>
+                            <Typography.Text style={{ textAlign: 'start' }}>Total items</Typography.Text>
                         </Col>
                         <Col span={12} align='end'>
-                            <Typography.Text strong>10</Typography.Text>
+                            <Typography.Text strong>{totalItems}</Typography.Text>
                         </Col>
                     </Row>
                     <Row>
@@ -71,7 +77,7 @@ const Checkout = () => {
                             <Typography.Text>Subtotal</Typography.Text>
                         </Col>
                         <Col span={12} align='end'>
-                            <Typography.Text strong>$23</Typography.Text>
+                            <Typography.Text strong>{formatCurrency(totalAmount)}</Typography.Text>
                         </Col>
                     </Row>
                     <Row>
@@ -79,7 +85,7 @@ const Checkout = () => {
                             <Typography.Text>Shipping</Typography.Text>
                         </Col>
                         <Col span={12} align='end'>
-                            <Typography.Text strong>$0</Typography.Text>
+                            <Typography.Text strong>{formatCurrency(shippingFee)}</Typography.Text>
                         </Col>
                     </Row>
                     <Divider />
@@ -88,7 +94,7 @@ const Checkout = () => {
                             <Typography.Text>Total</Typography.Text>
                         </Col>
                         <Col span={12} align='end'>
-                            <Typography.Text strong>$23</Typography.Text>
+                            <Typography.Text strong>{formatCurrency(totalAmount + shippingFee)}</Typography.Text>
                         </Col>
                     </Row>
                     

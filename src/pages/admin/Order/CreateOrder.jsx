@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { App, Form, Input, Button, Select, DatePicker, Flex, Typography, Card, Row, Col, Image, Divider, Collapse, Radio, message, Descriptions, InputNumber } from 'antd';
+import { App, Form, Input, Button, Select, Modal, Flex, Typography, Card, Row, Col, Image, Divider, Collapse, Radio, message, Descriptions, InputNumber } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import apiInstance from '../../../services/api';
 import endpoints from '../../../contants/Endpoint';
 import apiEndpoints from '../../../contants/ApiEndpoints';
 import PaymentMethod from '../../../contants/PaymentMethod';
+import moment from 'moment';
 
 const { Option } = Select;
 const { Panel } = Collapse;
@@ -21,6 +22,9 @@ const CreateOrder = () => {
     const [menuItems, setMenuItems] = useState([]);
     const { message } = App.useApp();
     const navigate = useNavigate();
+    const [onCreatingOrder, setOnCreatingOrder] = useState(false);
+
+    const [isModalSelectPromotionVisible, setIsModalSelectPromotionVisible] = useState(false);
 
     const [totalItems, setTotalItems] = useState(0);
     const [subtotal, setSubtotal] = useState(0);
@@ -29,6 +33,8 @@ const CreateOrder = () => {
 
     const [selectedItems, setSelectedItems] = useState([]);
     const [customer, setCustomer] = useState(null);
+    const [promotions, setPromotions] = useState([]);
+    const [selectedPromotion, setSelectedPromotion] = useState(null);
 
     const [step, setStep] = useState(1);
 
@@ -54,7 +60,18 @@ const CreateOrder = () => {
             });
     };
 
+    const fetchUsablePromoCode = async () => {
+        await apiInstance.get(apiEndpoints.admin.promotion.getUsableByCustomerId(customer.id))
+            .then((response) => {
+                setPromotions(response.data.$values);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    }
+
     const handleCreateOrder = async () => {
+        setOnCreatingOrder(true);
         const values = form.getFieldsValue();
         const order = {
             employeeId: '916b633f-9167-4823-84cc-6e43795f0fc2',
@@ -64,6 +81,7 @@ const CreateOrder = () => {
                 menuItemId: item.id,
                 quantity: item.quantity
             })),
+            promotionId: selectedPromotion ? selectedPromotion.id : null,
             note: values.note,
             orderCardNumber: values.orderCardNumber
         };
@@ -76,6 +94,8 @@ const CreateOrder = () => {
             .catch((error) => {
                 console.error(error);
                 message.error('Failed to create order');
+            }).finally(() => {
+                setOnCreatingOrder(false);
             });
     }
 
@@ -131,16 +151,38 @@ const CreateOrder = () => {
         setTotal(total);
     }
 
+    const handleOk = () => {
+        setIsModalSelectPromotionVisible(false);
+    };
+
+    const handleCancel = () => {
+        setIsModalSelectPromotionVisible(false);
+    };
+
     useEffect(() => {
         fetchMenuItems();
     }, []);
 
+    const handleOpenPromotionSelection = () => {
+        fetchUsablePromoCode();
+        setIsModalSelectPromotionVisible(true);
+    }
+
+    const handleSelectPromotion = (promotion) => { 
+        setSelectedPromotion(promotion);
+        handleCalculateTotal();
+        setIsModalSelectPromotionVisible(false);
+        setDiscount(subtotal * promotion.discountRate / 100);
+    }
+
     useEffect(() => {
         handleCalculateTotal();
     }
-        , [selectedItems]);
+        , [selectedItems, discount]);
 
     return (
+        <>
+        
         <Form align='start' onFinish={handleCreateOrder} layout='vertical' style={{ height: '100%', paddingBottom: 16 }} form={form}>
             <Typography.Title level={2}>Create Order</Typography.Title>
             <Flex style={{ width: '100%', height: '100%' }}>
@@ -219,7 +261,7 @@ const CreateOrder = () => {
                                                         <>
                                                         <Row gutter={16}>
                                                             <Col span={12} style={{ textAlign: 'start' }}>
-                                                                <Typography.Text strong>Credit Card</Typography.Text>
+                                                                <Typography.Text strong>{method}</Typography.Text>
                                                             </Col>
                                                             <Col span={8}></Col>
                                                             <Col span={4}>
@@ -279,8 +321,8 @@ const CreateOrder = () => {
                                 <Divider />
 
                                 <Flex flex={1} align='center' style={{ marginBottom: 16 }}>
-                                    <Input placeholder='Enter promo code' />
-                                    <Button type='primary'>Apply</Button>
+                                    <Input value={selectedPromotion?.code} placeholder='Enter promo code' />
+                                    <Button onClick={()=>handleOpenPromotionSelection()} type='primary'>Apply</Button>
                                 </Flex>
 
                                 <Flex flex={1} vertical style={{ marginBottom: 16 }}>
@@ -323,6 +365,49 @@ const CreateOrder = () => {
                 </Row>
             </Flex>
         </Form>
+        <Modal title='Select voucher' open={isModalSelectPromotionVisible} onOk={handleOk} onCancel={handleCancel}>
+            
+            {promotions && 
+                
+                <Radio.Group buttonStyle="solid" style={{ width: '100%' }}>
+                {promotions.map((promotion, index) => (
+                    <Card onClick={()=>handleSelectPromotion(promotion)} key={index} style={{ marginBottom: 16 }}>
+                        <Row gutter={16}>
+                            <Col span={6}>
+                                <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                                    <div style={{ position: 'absolute',  top: '50%', left: '50%', transform: 'translate(-50%, -50%)', color: 'black', fontWeight: 'bold', fontSize: '24px' }}>
+                                        {promotion.discountRate}%
+                                    </div>
+                                </div>
+                            </Col>
+                            <Col span={18}>
+                            <Row gutter={16}>
+                            <Typography.Title level={4}>{promotion.code}</Typography.Title>
+
+                                </Row>
+                                <Row gutter={16}>
+                                    <Typography.Text>{promotion.name}</Typography.Text>
+                                </Row>
+                                <Row gutter={16}>
+                                    
+                                    <Typography.Text>Due: {moment(promotion.endDate).format('YYYY-MM-DD')}</Typography.Text>
+                                </Row>
+                                <Row gutter={16}>
+                           
+                                <Typography.Text>{promotion.description}</Typography.Text>
+                           
+                        </Row>
+                            </Col>
+                        </Row>                    
+                    </Card>
+                ))}
+                
+            </Radio.Group>              
+               
+           }
+            
+        </Modal>
+        </>
     );
 };
 

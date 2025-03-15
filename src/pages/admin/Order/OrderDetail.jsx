@@ -68,7 +68,7 @@ const OrderDetail = () => {
                             <Descriptions.Item label="Order Date & Time">{moment(order.orderDate).format('YYYY-MM-DD HH:mm:ss')}</Descriptions.Item>
                             <Descriptions.Item label="Customer Name">{order.customer.name}</Descriptions.Item>
                             <Descriptions.Item label="Phone Number">{order.customer.phoneNumber}</Descriptions.Item>
-                            <Descriptions.Item label="Address">{}</Descriptions.Item>
+                            <Descriptions.Item label="Order Card">{order.orderCardNumber}</Descriptions.Item>
                         </Descriptions>
                         <Divider />
 
@@ -98,7 +98,11 @@ const OrderDetail = () => {
                         <Typography.Title level={4}>Order Summary</Typography.Title>
                         <Row gutter={16} justify={'space-between'}>
                             <Typography.Text>Payment method:</Typography.Text>
-                            <Typography.Text strong>30</Typography.Text>
+                            <Typography.Text strong>{order.paymentMethod}</Typography.Text>
+                        </Row>
+                        <Row gutter={16} justify={'space-between'}>
+                            <Typography.Text>Payment status:</Typography.Text>
+                            <Typography.Text strong>{order.paymentStatus}</Typography.Text>
                         </Row>
                         <Row gutter={16} justify={'space-between'}>
                             <Typography.Text>Voucher Applied:</Typography.Text>

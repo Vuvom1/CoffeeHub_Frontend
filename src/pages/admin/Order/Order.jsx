@@ -167,7 +167,6 @@ const Order = () => {
 
                         </SubMenu>
                     </Menu>
-                    <Button type="default" onClick={showModalAddCategory} >Add Category</Button>
                 </Flex>
             </Flex>
             <Table

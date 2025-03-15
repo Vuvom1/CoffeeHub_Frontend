@@ -13,6 +13,17 @@ const apiEndpoints = {
     },
     customer: {
         verifyCustomer: 'Customer',
+        menuItems: {
+            getAll: 'MenuItem',
+            getById: (id) => `MenuItem/${id}`,
+            getPopular: (limit) => `MenuItem/getPopular?limit=${limit}`,
+            getNewest: (limit) => `MenuItem/getNewest?limit=${limit}`,
+        },
+        categories: {
+            getAll: 'MenuItemCategory',
+            getById: (id) => `MenuItemCategory/${id}`,
+            getAllWithItems: 'MenuItemCategory/getWithMenuItems',
+        },
     },
     admin: {
         admin: {
@@ -84,6 +95,7 @@ const apiEndpoints = {
         promotion: {
             getAll: 'Promotion',
             getById: (id) => `Promotion/${id}`,
+            getUsableByCustomerId: (id) => `Promotion/usable/${id}`,
             add: 'Promotion',
             update: (id) => `Promotion/${id}`,
             updateActivation: (id) => `Promotion/activation/${id}`,

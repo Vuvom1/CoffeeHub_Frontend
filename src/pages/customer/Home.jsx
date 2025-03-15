@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Carousel, Rate, Slider, Typography } from 'antd';
 import { Row, Col, Card } from 'antd';
 import { Footer } from 'antd/es/layout/layout';
 import ProductCard from '../../components/ProductCard';
+import apiInstance from '../../services/api';
+import apiEndpoints from '../../contants/ApiEndpoints';
 
 const menuItems = [
     { name: 'Espresso', description: 'Strong and bold coffee', image: 'src/assets/sample-menu-item-1.jpg' },
@@ -17,6 +19,33 @@ const menuItems = [
 
 const Home = () => {
 
+    const [popularItems, setPopularItems] = useState([]);
+    const [newestItems, setNewestItems] = useState([]);
+
+    const fetchPopularItems = async () => {
+        await apiInstance.get(apiEndpoints.customer.menuItems.getPopular(8)).then(response => {
+            setPopularItems(response.data.$values);
+        }
+        ).catch(error => {
+            console.log(error);
+        });
+    }
+
+    const fetchNewestItems = async () => {
+        await apiInstance.get(apiEndpoints.customer.menuItems.getNewest(8)).then(response => {
+            setNewestItems(response.data.$values);
+        }
+        ).catch(error => {
+            console.log(error);
+        });
+    }
+
+    useEffect(() => {
+        fetchPopularItems();
+        fetchNewestItems();
+    }
+    , []);
+
     return (
         <div>
             <Carousel autoplay style={{ width: '100%', height: 'calc(100% - 64px)' }}>
@@ -28,7 +57,7 @@ const Home = () => {
             <Typography.Title level={2} style={{ textAlign: 'center', marginTop: 10 }}>COFFEEHUB MERCHANDISE</Typography.Title>
 
             <Row gutter={[20, 20]} style={{ marginTop: 24, marginLeft: '15%', marginRight: '15%' }}>
-                {menuItems.map((item, index) => (
+                {popularItems.map((item, index) => (
                     <Col key={index} xs={24} sm={12} md={8} lg={6}>
                         <ProductCard item={item} />
                     </Col>
@@ -43,10 +72,10 @@ const Home = () => {
             </div>
 
             <Typography  style={{ textAlign: 'center', marginTop: 30, fontStyle: 'italic', color: '#854836' }}>What happened here</Typography>
-            <Typography.Title level={2} style={{ textAlign: 'center', marginTop: 10 }}>MERCHANDISE SALE</Typography.Title>
+            <Typography.Title level={2} style={{ textAlign: 'center', marginTop: 10 }}>NEW REALEASE</Typography.Title>
 
             <Row gutter={[20, 20]} style={{ marginTop: 24, marginLeft: '15%', marginRight: '15%' }}>
-                {menuItems.map((item, index) => (
+                {newestItems.map((item, index) => (
                     <Col key={index} xs={24} sm={12} md={8} lg={6}>
                         <ProductCard item={item} />
                     </Col>

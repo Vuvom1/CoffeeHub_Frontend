@@ -1,6 +1,6 @@
 const PaymentMethod = Object.freeze({
     CASH: 'cash',
-    BANK_TRANSFER: 'bank_transfer'
+    BANK_TRANSFER: 'Bank Transfer',
 });
 
 export default PaymentMethod;
