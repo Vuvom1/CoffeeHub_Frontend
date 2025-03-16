@@ -89,7 +89,7 @@ const CreateOrder = () => {
         await apiInstance.post(apiEndpoints.admin.order.add, order)
             .then((response) => {
                 message.success('Order created successfully');
-                navigate(endpoints.admin.order);
+                // navigate(endpoints.admin.order);
             })
             .catch((error) => {
                 console.error(error);
@@ -322,7 +322,7 @@ const CreateOrder = () => {
 
                                 <Flex flex={1} align='center' style={{ marginBottom: 16 }}>
                                     <Input value={selectedPromotion?.code} placeholder='Enter promo code' />
-                                    <Button onClick={()=>handleOpenPromotionSelection()} type='primary'>Apply</Button>
+                                    <Button onClick={()=>handleOpenPromotionSelection()} type='primary'>Select</Button>
                                 </Flex>
 
                                 <Flex flex={1} vertical style={{ marginBottom: 16 }}>

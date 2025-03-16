@@ -29,6 +29,7 @@ import EmployeeVerify from './pages/auth/EmployeeVerify';
 import CustomerVerify from './pages/auth/CustomerVerify';
 import RequireAuth from './components/RequiredAuth';
 import Promotion from './pages/admin/Promotion/Promotion';
+import Dashboard from './pages/admin/Dashboard/Dashboard';
 
 const AppRoutes = () => (
   <Router>
@@ -60,6 +61,7 @@ const AppRoutes = () => (
           <AdminLayout />
         </RequireAuth>
       }>
+        <Route path='dashboard' element={<Dashboard />} />
         <Route path='menu-item' element={<MenuItem />} />
         <Route path='ingredient' element={<Ingredient />} />
         <Route path='ingredient-stock' element={<IngredientStock />} />

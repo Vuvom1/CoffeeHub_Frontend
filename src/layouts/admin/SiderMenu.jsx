@@ -20,7 +20,7 @@ const SiderMenu = () => {
 return (
     <Menu defaultSelectedKeys={['1']} mode="inline">
         <Menu.Item key="1" icon={<PieChartOutlined />}>
-            <Link to={endpoints.admin.base}>Dashboard</Link>
+            <Link to={endpoints.admin.dashboard}>Dashboard</Link>
         </Menu.Item>
         <Menu.Item key="2" icon={<CoffeeOutlined />}>
             <Link to={endpoints.admin.menuItem}>Menu Item</Link>

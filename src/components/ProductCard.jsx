@@ -1,7 +1,14 @@
-import React from 'react';
+import React, {useNavigate} from 'react';
 import { Card, Typography, Rate } from 'antd';
+import endpoints from '../contants/Endpoint';
 
 const ProductCard = ({ item }) => {
+
+
+    // const handleClick = () => {
+    //     navigate(endpoints.customer);
+    // }
+
     return (
         <Card
             hoverable

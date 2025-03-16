@@ -24,6 +24,21 @@ const apiEndpoints = {
             getById: (id) => `MenuItemCategory/${id}`,
             getAllWithItems: 'MenuItemCategory/getWithMenuItems',
         },
+        customer: {
+            getById: (id) => `Customer/${id}`,
+            getByAuthId: (id) => `Customer/getByAuthId/${id}`, 
+            update: (id) => `Customer/${id}`,
+            
+        }, 
+        order: {
+            getById: (id) => `Order/${id}`,
+            add: 'Order',
+            addWithDelivery: 'Order/createWithDelivery',
+            update: (id) => `Order/${id}`,
+        },
+        promotion: {
+            getUsablePromotionsByCustomerId: (id) => `Promotion/usable/${id}`,
+        },
     },
     admin: {
         admin: {
@@ -31,6 +46,7 @@ const apiEndpoints = {
         },
         employee: {
             getAll: 'Employee',
+            getAllWithSchedules: 'Employee/schedule',
             getById: (id) => `Employee/${id}`,
             add: 'Employee',
             update: (id) => `Employee/${id}`,
@@ -91,6 +107,13 @@ const apiEndpoints = {
         },
         schedule: {
             getAll: 'Schedule',
+            add: 'Schedule',
+            update: (id) => `Schedule/${id}`,
+            delete: 'Schedule',
+            getById: (id) => `Schedule/${id}`,
+        },
+        shift: {
+            getAll: 'Shift',
         },
         promotion: {
             getAll: 'Promotion',

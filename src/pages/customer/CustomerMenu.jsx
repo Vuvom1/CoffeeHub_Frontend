@@ -43,7 +43,7 @@ const CustomerMenu = () => {
                                     <Col span={6}>
                                     <Image height={120} width={120} src={item.imageUrl} />
                                     </Col>
-                                    <Col span={12} offset={1} style={{ textAlign: 'start' }}>
+                                    <Col xs={20} lg={12} offset={2} style={{ textAlign: 'start' }}>
                                         
                                         <Row gutter={16} justify={'space-between'}>
                                         <Typography strong style={{ fontSize: 24 }}>{item.name}</Typography>

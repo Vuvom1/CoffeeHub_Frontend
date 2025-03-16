@@ -32,7 +32,7 @@ const Customer = () => {
             title: 'Username',
             dataIndex: 'auth',
             key: 'auth',
-            render: (text) => text.username ? text.username : 'N/A'
+            render: (text) => text?.username ? text.username : 'N/A'
         },
         {
             title: 'Phone',

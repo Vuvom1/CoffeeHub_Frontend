@@ -1,5 +1,5 @@
 const PaymentMethod = Object.freeze({
-    CASH: 'cash',
+    CASH: 'Cash',
     BANK_TRANSFER: 'Bank Transfer',
 });
 
