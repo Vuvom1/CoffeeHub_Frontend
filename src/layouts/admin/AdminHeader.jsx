@@ -14,7 +14,6 @@ const AdminHeader = () => {
 
     const handleLogout = () => {
         dispatch(logout());
-        console.log("Logout");
         window.location.reload();
     }
     

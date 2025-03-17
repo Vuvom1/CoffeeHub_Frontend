@@ -1,3 +1,4 @@
+import { statistic } from "antd/es/theme/internal";
 import AddEmployee from "../pages/admin/Employee/AddEmployee";
 import AddMenuItemCategory from "../pages/admin/MenuItem/AddMenuItemCategory";
 
@@ -6,10 +7,38 @@ const baseURL = 'https://localhost:7035/api/';
 const apiEndpoints = {
     baseURL: baseURL,
     auth: {
+        getDetails: 'Auth/details',
         login: 'Auth/login',
         signup: 'Auth/register',
         signupCustomer: 'Auth/register-customer',
         AddEmployee: 'Auth/register-employee',
+    },
+    cashier: {
+        order: {
+            getAll: 'Order',
+            getById: (id) => `Order/${id}`,
+            create: 'Order',
+            startProcessingOrder: (id) => `Order/${id}/start-processing`,
+        },
+        customer: {
+            getById: (id) => `Customer/${id}`,
+        },
+    }, 
+
+    barista: {
+        order: {
+            getAll: 'Order',
+            getById: (id) => `Order/${id}`,
+            startPreparingOrder: (id) => `Order/${id}/start-preparing`,
+            markReadyForPickup: (id) => `Order/${id}/mark-ready`,
+        },  
+    },
+    waiter: {
+        order: {
+            getAll: 'Order',
+            getById: (id) => `Order/${id}`,
+            completeOrder: (id) => `Order/${id}/complete`,
+        },
     },
     customer: {
         verifyCustomer: 'Customer',
@@ -41,6 +70,16 @@ const apiEndpoints = {
         },
     },
     admin: {
+        statistic: {
+            finance: (startDate, endDate) => `Statistic/Finance?startDate=${startDate}&endDate=${endDate}`,
+            schedule: (startDate, endDate) => `Statistic/Schedule?startDate=${startDate}&endDate=${endDate}`,
+            stock: (limit) => `Statistic/Stock?limit=${limit}`,
+            dailyFinancial: (startDate, endDate) => `Statistic/DailyFinancial?startDate=${startDate}&endDate=${endDate}`,
+            monthlyFinancial: (startDate, endDate) => `Statistic/MonthlyFinancial?startDate=${startDate}&endDate=${endDate}`,
+            yearlyFinancial: (startDate, endDate) => `Statistic/YearlyFinancial?startDate=${startDate}&endDate=${endDate}`,
+            popularMenuItems: (startDate, endDate, limit) => `Statistic/PopularMenuItems?startDate=${startDate}&endDate=${endDate}&limit=${limit}`,
+            leastPopularMenuItems: (startDate, endDate,limit) => `Statistic/LeastPopularMenuItems?startDate=${startDate}&endDate=${endDate}&limit=${limit}`,
+        },
         admin: {
             getAll: 'Admin',
         },
@@ -62,6 +101,7 @@ const apiEndpoints = {
             getById: (id) => `Order/${id}`,
             add: 'Order',
             update: (id) => `Order/${id}`,
+            updateStatus: (id, status) => `Order/${id}/status?orderStatus=${status}`,
         },
         menuItem: {
             getAll: 'MenuItem',

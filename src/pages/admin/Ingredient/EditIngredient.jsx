@@ -36,6 +36,7 @@ const EditIngredient = ({ id, onSave, onCancel }) => {
         if (onUpdating) {
             return;
         }
+
         setOnUpdating(true);
         try {
             let imageUrl = ingredient.imageUrl;

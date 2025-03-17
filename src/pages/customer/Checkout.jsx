@@ -28,7 +28,7 @@ const Checkout = () => {
     const totalItems = useSelector((state) => state.cart.totalItems);
     const cart = useSelector((state) => state.cart);
     const user = useSelector((state) => state.auth.user);
-    const userId = user?.nameid;
+    const userId = user?.id;
 
     const [customerInfo, setCustomerInfo] = useState({});
     const [selectedPromotion, setSelectedPromotion] = useState(null);
@@ -39,7 +39,7 @@ const Checkout = () => {
 
     const handleCreateOrderWithDelivery = async (values) => {
         const order = {
-            customerId: customerInfo.id,
+            customerId: userId,
             paymentMethod: values.paymentMethod,
             promotionId: selectedPromotion?.id,
             orderCardNumber: 0,
@@ -67,7 +67,7 @@ const Checkout = () => {
     }
 
     const fetchUsablePromotions = async () => {
-        await apiInstance.get(apiEndpoints.customer.promotion.getUsablePromotionsByCustomerId(customerInfo.id)).then(response => {
+        await apiInstance.get(apiEndpoints.customer.promotion.getUsablePromotionsByCustomerId(userId)).then(response => {
             setPromotions(response.data.$values);
         }).catch(error => {
             console.log(error);
@@ -122,17 +122,17 @@ const Checkout = () => {
                     <Collapse defaultActiveKey={['1']}>
                         <Panel header={<div style={panelHeaderStyle}>Receiver Information</div>} key="1">
                             <Flex vertical>
-                                <Form.Item label="Receiver's Name" name="receiverName" rules={[{ required: true, message: 'Please input receiver\'s name!' }]}>
+                                <Form.Item initialValue={user.name} label="Receiver's Name" name="receiverName" rules={[{ required: true, message: 'Please input receiver\'s name!' }]}>
                                     <Input placeholder="Enter receiver's names" />
                                 </Form.Item>
-                                <Form.Item label="Phone Number" name="phoneNumber" rules={[{ required: true, message: 'Please input receiver\'s phone number!' }]}>
+                                <Form.Item initialValue={user.phoneNumber} label="Phone Number" name="phoneNumber" rules={[{ required: true, message: 'Please input receiver\'s phone number!' }]}>
                                     <Input placeholder="Enter receiver's phone number" />
                                 </Form.Item>
                             </Flex>
                         </Panel>
                         <Panel header={<div style={panelHeaderStyle}>Shipping Address</div>} key="2">
                             <Flex vertical>
-                                <Form.Item label="Address" name="address" rules={[{ required: true, message: 'Please input your address!' }]}>
+                                <Form.Item initialValue={user.address} label="Address" name="address" rules={[{ required: true, message: 'Please input your address!' }]}>
                                     <Input placeholder="Enter your address" />
                                 </Form.Item>
                             </Flex>

@@ -6,8 +6,8 @@ import endpoints from '../../../contants/Endpoint';
 import apiEndpoints from '../../../contants/ApiEndpoints';
 import PaymentMethod from '../../../contants/PaymentMethod';
 import moment from 'moment';
+import { useSelector } from 'react-redux';
 
-const { Option } = Select;
 const { Panel } = Collapse;
 
 
@@ -18,6 +18,8 @@ const panelHeaderStyle = {
 };
 
 const CreateOrder = () => {
+    const user = useSelector((state) => state.auth.user);
+    
     const [form] = Form.useForm();
     const [menuItems, setMenuItems] = useState([]);
     const { message } = App.useApp();
@@ -74,7 +76,7 @@ const CreateOrder = () => {
         setOnCreatingOrder(true);
         const values = form.getFieldsValue();
         const order = {
-            employeeId: '916b633f-9167-4823-84cc-6e43795f0fc2',
+            employeeId: user.id,
             customerId: values.customerId,
             paymentMethod: values.paymentMethod,
             orderDetails: selectedItems.map((item) => ({
@@ -89,11 +91,10 @@ const CreateOrder = () => {
         await apiInstance.post(apiEndpoints.admin.order.add, order)
             .then((response) => {
                 message.success('Order created successfully');
-                // navigate(endpoints.admin.order);
+                navigate(endpoints.admin.order);
             })
             .catch((error) => {
-                console.error(error);
-                message.error('Failed to create order');
+                message.error(error.response.data.detailed ? error.response.data.detailed : error.response.data.message);
             }).finally(() => {
                 setOnCreatingOrder(false);
             });

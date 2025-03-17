@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Menu, Breadcrumb, Card, Row, Col, Typography, Statistic, Table, Button, Radio } from 'antd';
+import { Layout, Menu, Breadcrumb, Card, Row, Col, Typography, Statistic, Table, Button, Radio, Skeleton, Image } from 'antd';
 import {
     DesktopOutlined,
     PieChartOutlined,
@@ -10,166 +10,234 @@ import {
 
 import { Bar, Line, Pie } from '@ant-design/charts';
 import ButtonGroup from 'antd/es/button/button-group';
+import { useEffect } from 'react';
+import { useState } from 'react';
+import apiInstance from '../../../services/api';
+import apiEndpoints from '../../../contants/ApiEndpoints';
+import moment from 'moment-timezone';
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
 
-class Dashboard extends React.Component {
-    state = {
-        collapsed: false,
-    };
+const Dashboard = () => {
+    const now = moment().tz('Asia/Bangkok').endOf('day').add(7, 'hours');
+    const startOfDay = moment().tz('Asia/Bangkok').startOf('day');
+    const startOfMonth = moment().tz('Asia/Bangkok').startOf('month');
+    const startOfYear = moment().tz('Asia/Bangkok').startOf('year');
+    const startOfTwelveMonthsAgo = moment().tz('Asia/Bangkok').subtract(12, 'months').startOf('month');
+    const startOfTenYearsAgo = moment().tz('Asia/Bangkok').subtract(10, 'years').startOf('year');
 
-    onCollapse = (collapsed) => {
-        this.setState({ collapsed });
-    };
+    const [finacialStatistics, setFinancialStatistics] = useState([]);
+    const [scheduleStatistics, setScheduleStatistics] = useState([]);
+    const [stockStatistics, setStockStatistics] = useState({});
+    const [periodlyStatistics, setPeriodlyStatistics] = useState([]);
+    const [popularItems, setPopularItems] = useState([]);
+    const [leastPopularItems, setLeastPopularItems] = useState([]);
 
-    render() {
-        const { collapsed } = this.state;
+    const [period, setPeriod] = useState('daily');
+
+    const [startDate, setStartDate] = useState(startOfDay.toISOString());
+    const [endDate, setEndDate] = useState(now.toISOString());
+    
+
+    const handleSelectPeriod = (value) => {
+        setPeriod(value);
+        
+        switch (value) {
+            case 'daily':
+                setStartDate(startOfDay.toISOString());
+                setEndDate(now.toISOString());
+                break;
+            case 'monthly':
+                setStartDate(startOfMonth.toISOString());
+                setEndDate(now.toISOString());
+                break;
+            case 'yearly':
+                setStartDate(startOfYear.toISOString());
+                setEndDate(now.toISOString());
+                break;
+            default:
+                break;
+        }
+    }
+
+    const fetchFinancialStatistics = async () => {
+        console.log(startDate, endDate);
+        await apiInstance.get(apiEndpoints.admin.statistic.finance(startDate, endDate)).then((response) => {
+            setFinancialStatistics(response.data);
+            console.log(response.data);
+        });
+    }
+
+    const fetchSheduleStatistics = async () => {
+        await apiInstance.get(apiEndpoints.admin.statistic.schedule(startDate, endDate)).then((response) => {
+            setScheduleStatistics(response.data.$values);
+            console.log(response.data.$values);
+        });
+    }
+
+    const fetchStockStatistics = async () => {
+        await apiInstance.get(apiEndpoints.admin.statistic.stock(5)).then((response) => {
+            setStockStatistics(response.data);
+        });
+    }
+
+    const fetchPeriodlyStatistics = async () => {
+        switch (period) {
+            case 'daily':
+                await apiInstance.get(apiEndpoints.admin.statistic.dailyFinancial(startOfMonth.toISOString(), endDate)).then((response) => {
+                    setPeriodlyStatistics(response.data.$values);
+                });
+                break;
+            case 'monthly':
+                await apiInstance.get(apiEndpoints.admin.statistic.monthlyFinancial(startOfTwelveMonthsAgo.toISOString(), endDate)).then((response) => {
+                    setPeriodlyStatistics(response.data.$values);
+                }
+                );
+                break;
+            case 'yearly':
+                await apiInstance.get(apiEndpoints.admin.statistic.yearlyFinancial(startOfTenYearsAgo.toISOString(), endDate)).then((response) => {
+                    setPeriodlyStatistics(response.data.$values);
+                });
+                break;
+        }
+    }
+
+    const fetchPopularItems = async () => {
+        await apiInstance.get(apiEndpoints.admin.statistic.popularMenuItems(startDate, endDate, 5)).then((response) => {
+            setPopularItems(response.data);
+        });
+    }
+
+    const fetchLeastPopularItems = async () => {
+        await apiInstance.get(apiEndpoints.admin.statistic.leastPopularMenuItems(startDate, endDate, 5)).then((response) => {
+            setLeastPopularItems(response.data);
+        });
+    }
+
+    useEffect(() => {
+        handleSelectPeriod('daily');
+    }, []);
+
+    useEffect(() => {
+        fetchFinancialStatistics();
+        fetchSheduleStatistics();
+        fetchStockStatistics();
+        fetchPeriodlyStatistics();
+        fetchPopularItems();
+        fetchLeastPopularItems();
+    }
+        , [startDate, endDate]);
+    useState(() => {
+        fetchPeriodlyStatistics();
+    }, [period]);
+
+    if (finacialStatistics.length == 0 && scheduleStatistics.length == 0 && stockStatistics == {} && periodlyStatistics.length == 0) {
         return (
-            <>
-            <Row style={{ marginBottom: '16px', justifyContent: 'space-between' }} > 
-            <Typography.Title level={2}>Dashboard</Typography.Title>
-            <Radio.Group style={{alignContent: 'center'}} defaultValue="a" buttonStyle="solid">
-                <Radio.Button value="a">Week</Radio.Button>
-                <Radio.Button value="b">Month</Radio.Button>
-                <Radio.Button value="c">Year</Radio.Button>
-            </Radio.Group>
+            <Skeleton active />
+        );
+    }
+
+    return (
+        <>
+            <Row style={{ marginBottom: '16px', justifyContent: 'space-between' }} >
+                <Typography.Title level={2}>Dashboard</Typography.Title>
+                <Radio.Group style={{ alignContent: 'center' }} defaultValue="daily" buttonStyle="solid" onChange={(e) => handleSelectPeriod(e.target.value)}>
+                    <Radio.Button value="daily">Day</Radio.Button>
+                    <Radio.Button value="monthly">Month</Radio.Button>
+                    <Radio.Button value="yearly">Year</Radio.Button>
+                </Radio.Group>
             </Row>
 
             <Row gutter={[16, 16]} style={{ marginBottom: '16px' }}>
-            <Col span={8}>
-            <Card style={{ width: '100%' }}>
-                <Statistic title="Active Users" value={112893} />
-            </Card>
-            </Col>
-            <Col span={8}>
-            <Card>
-                <Statistic title="Account Balance (CNY)" value={112893} precision={2} />
-            </Card>
-            </Col>
-            <Col span={8}>
-            <Card>
-                <Statistic title="Active Users" value={112893} />
-            </Card>
-            </Col>
+                <>
+                    <Col span={8}>
+                        <Card>
+                            <Statistic title="Total Revenue" value={finacialStatistics.totalRevenue} precision={2} />
+                        </Card>
+                    </Col>
+                    <Col span={8}>
+                        <Card>
+                            <Statistic title="Total Cost" value={finacialStatistics.totalStockCost} precision={2} />
+                        </Card>
+                    </Col>
+                    <Col span={8}>
+                        <Card>
+                            <Statistic title="Total Profit" value={finacialStatistics.totalProfit} precision={2} />
+                        </Card>
+                    </Col>
+                </>
             </Row>
-            <Row style={{marginBottom: 16}} gutter={[16, 16]}>
-               
-            <Col span={8}>
-            <Card>
-            <Pie 
-                height={400}
-                data={[
-                { type: '分类一', value: 27 },
-                { type: '分类二', value: 25 },
-                { type: '分类三', value: 18 },
-                { type: '分类四', value: 15 },
-                { type: '分类五', value: 10 },
-                { type: 'Other', value: 5 },
-                ]}
-                angleField='value'
-                colorField='type'
-                radius={0.8}
-                label={{
-                type: 'inner',
-                offset: '-30%',
-                content: function content(_ref) {
-                var percent = _ref.percent;
-                return ''.concat(percent * 100, '%');
-                },
-                style: {
-                fontSize: 14,
-                textAlign: 'center',
-                },
-                }}
-                interactions={[{ type: 'element-active' }]}
-            />
-            </Card>
-            </Col>
-            <Col span={16}>
-            <Card>
-                <Bar
-                height={400}
-                data={[
-                { item: 'Coffee Beans', value: 300 },
-                { item: 'Milk', value: 200 },
-                { item: 'Sugar', value: 150 },
-                { item: 'Cups', value: 100 },
-                { item: 'Lids', value: 80 },
-                ]}
-                xField='item'
-                yField='value'
-                label={{ position: 'middle', style: { fill: '#aaa' } }}
-                seriesField='item'
-                />
-            </Card>
-            </Col>
+            <Row style={{ marginBottom: 16 }} gutter={[16, 16]}>
+                <Col span={8}>
+                    <Card>
+                        <Pie
+                            height={400}
+                            innerRadius={0.5}
+                            data={scheduleStatistics?.map((item) => ({ name: item.shift.name, totalTime: item.totalTime }))}
+                            angleField='totalTime'
+                            colorField='name'
+                            radius={0.8}
+                            label={{ type: 'inner', offset: '-30%', style: { textAlign: 'center' }, content: '' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={16}>
+                    <Card>
+                        <Bar
+                            height={400}
+                            data={stockStatistics?.ingredientsWithLowStock?.$values.map((item) => ({ item: item.name, value: item.totalQuantity }))}
+                            xField='item'
+                            yField='value'
+                            seriesField='item'
+                            colorField='item'
+                            label={null}
+                        />
+                    </Card>
+                </Col>
             </Row>
-            
+
             <Row gutter={[16, 16]}>
-            <Col span={16}>
-            <Card>
-                <Line
-                height={400}
-                data={[
-                { year: '1991', value: 3 },
-                { year: '1992', value: 4 },
-                { year: '1993', value: 3.5 },
-                { year: '1994', value: 5 },
-                { year: '1995', value: 4.9 },
-                { year: '1996', value: 6 },
-                { year: '1997', value: 7 },
-                { year: '1998', value: 9 },
-                { year: '1999', value: 13 },
-                ]}
-                xField='year'
-                yField='value'
-                point={{ size: 5, shape: 'diamond' }}
-                label={{ style: { fill: '#aaa' } }}
-                />
-            </Card>
-            </Col>
-            <Col span={8}>
-            <Card title="Trending Items">
-            <Table
-                showHeader={false}
-                columns={[
-                {
-                title: 'Name',
-                dataIndex: 'name',
-                key: 'name',
-                },
-                {
-                title: 'Price',
-                dataIndex: 'price',
-                key: 'price',
-                },
-                ]}
-                dataSource={[
-                {
-                key: '1',
-                name: 'John Brown',
-                price: 32,
-                },
-                {
-                key: '2',
-                name: 'Jim Green',
-                price: 42,
-                },
-                {
-                key: '3',
-                name: 'Joe Black',
-                price: 32,
-                },
-                ]}
-                pagination={false}
-            />
-            </Card>
-            </Col>
+                <Col span={16}>
+                    <Card>
+                        <Line
+                            height={400}
+                            data={periodlyStatistics?.map((item) => ({ key: item.key, value: item.value }))}
+                            xField='key'
+                            yField='value'
+                            point={{ size: 5, shape: 'diamond' }}
+                            label={{ style: { fill: '#aaa' }, content: '' }}
+                        />
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card title="Trending Items">
+                        <Table
+                            showHeader={false}
+                            columns={[
+                                {
+                                    dataIndex: 'imageUrl',
+                                    key: 'imageUrl',
+                                    render: (text) => (
+                                        <Image src={text
+                                        } style={{ width: 50, height: 50 }} />
+                                    )
+                                },
+                                {
+                                    title: 'Name',
+                                    dataIndex: 'name',
+                                    key: 'name',
+                                },
+                                
+                            ]}
+                            dataSource={popularItems}
+                            pagination={false}
+                        />
+                    </Card>
+                </Col>
             </Row>
-            </>
-        );
-    }
+        </>
+    );
 }
 
 export default Dashboard;

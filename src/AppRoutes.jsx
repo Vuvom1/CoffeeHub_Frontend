@@ -12,7 +12,6 @@ import CustomerMenu from './pages/customer/CustomerMenu';
 import AdminLayout from './layouts/admin/AdminLayout';
 import MenuItem from './pages/admin/MenuItem/MenuItem';
 import Ingredient from './pages/admin/Ingredient/Ingredient';
-import IngredientStock from './pages/admin/IngredientStock/IngredientStock';
 import Order from './pages/admin/Order/Order';
 import CreateOrder from './pages/admin/Order/CreateOrder';
 import CheckoutOrder from './pages/admin/Order/CheckoutOrder';
@@ -64,7 +63,6 @@ const AppRoutes = () => (
         <Route path='dashboard' element={<Dashboard />} />
         <Route path='menu-item' element={<MenuItem />} />
         <Route path='ingredient' element={<Ingredient />} />
-        <Route path='ingredient-stock' element={<IngredientStock />} />
         <Route path='order' >
           <Route index element={<Order />} />
           <Route path='create' element={<CreateOrder />} />

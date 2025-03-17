@@ -50,8 +50,18 @@ const IngredientStock = () => {
         },
         {
             key: 'costPrice',
-            title: 'Total Price',
+            title: 'Unit Price',
             dataIndex: 'costPrice',
+            render: (text) => (
+                <Flex>
+                    <Typography.Text>{text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Typography.Text>
+                </Flex>
+            )
+        },
+        {
+            key: 'totalCostPrice',
+            title: 'Total Price',
+            dataIndex: 'totalCostPrice',
             render: (text) => (
                 <Flex>
                     <Typography.Text>{text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Typography.Text>
