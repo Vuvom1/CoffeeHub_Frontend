@@ -1,95 +1,104 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Steps, Card, Tabs, List, Row, Col, Image, Flex, Collapse, Typography, Button, Divider } from 'antd';
+import { useSelector } from 'react-redux';
+import apiInstance from '../../services/api';
+import apiEndpoints from '../../contants/ApiEndpoints';
 
-const { Step } = Steps;
 const { TabPane } = Tabs;
-
-const mockOrders = [
-    { id: 1, status: 'Wait for pending', description: 'Order 1 description' },
-    { id: 2, status: 'Is Processing', description: 'Order 2 description' },
-    { id: 3, status: 'Is Delivering', description: 'Order 3 description' },
-    { id: 4, status: 'Delivered', description: 'Order 4 description' },
-    { id: 5, status: 'Wait for pending', description: 'Order 5 description' },
-];
 
 const OrderTracking = () => {
     const [activeKey, setActiveKey] = useState('1');
+    const customerId = useSelector(state => state.auth.user.id);
+    const [orders, setOrders] = useState([]);
+    const [showAll, setShowAll] = useState(null);
+
+    const fetchOrdersByCustomerId = async () => {
+        await apiInstance.get(apiEndpoints.customer.order.getByCustomerId(customerId)).then(response => {
+            setOrders(response.data.$values);
+        }
+        ).catch(error => {
+            console.log(error);
+        }
+        );
+    }
+
+    useEffect(() => {
+        fetchOrdersByCustomerId();
+    }, []);
+
 
     const getOrdersByStatus = (status) => {
-        return mockOrders.filter(order => order.status === status);
+        return orders.filter(order => order.delivery.status === status);
     };
 
     const renderOrders = (status) => (
         <Flex vertical gap={16} >
-            {getOrdersByStatus(status).map(order => {
-                const [showAll, setShowAll] = useState(false);
-
-                return (
-                    <div key={order.id}>
-                        <Row gutter={16}>
-                            <Col span={12} style={{ textAlign: 'start' }}>
-                                <p>{new Date().toLocaleDateString()}</p>
-                            </Col>
-                            <Col span={12} style={{ textAlign: 'end' }}>
-                                <p>{order.status}</p>
-                            </Col>
-                        </Row>
-                        <Row gutter={16} >
-                            <Col span={6}>
-                                <Image width={120} height={120} src='https://barista.qodeinteractive.com/wp-content/uploads/2016/03/product-image-3-633x633.jpg' />
-                            </Col>
-                            <Col span={12} style={{ textAlign: 'start' }}>
-                                <Row gutter={16}>
-                                    <Col span={24} style={{ textAlign: 'start' }}>
-                                        <Typography style={{ fontSize: 20 }}>Product Name</Typography>
-                                        <Typography.Text type='secondary' style={{ fontSize: 20 }}>$10</Typography.Text>
-                                        <p>Beverage</p>
-                                    </Col>
-                                </Row>
-                            </Col>
-                            <Col span={6} style={{ textAlign: 'end' }}>
-                                <Typography style={{ fontSize: 20 }}>x1</Typography>
-                            </Col>
-                        </Row>
-                        {showAll && (
-                            <Row gutter={16} style={{ marginTop: 16 }}>
+            {getOrdersByStatus(status).map((order, index) => (
+                <div key={order.id}>
+                    <Row gutter={16}>
+                        <Col span={12} style={{ textAlign: 'start' }}>
+                            <p>{new Date(order.orderDate).toLocaleDateString()} {new Date(order.orderDate).toLocaleTimeString()}</p>
+                        </Col>
+                        <Col span={12} style={{ textAlign: 'end' }}>
+                            <p>{order.delivery.status}</p>
+                        </Col>
+                    </Row>
+                    {order.orderDetails.$values && order.orderDetails.$values.length > 0 && (
+                        <>
+                            <Row gutter={16}>
                                 <Col span={6}>
-                                    <Image width={120} height={120} src='https://barista.qodeinteractive.com/wp-content/uploads/2016/03/product-image-3-633x633.jpg' />
+                                    <Image width={120} height={120} src={order.orderDetails.$values[0].menuItem.imageUrl} />
                                 </Col>
                                 <Col span={12} style={{ textAlign: 'start' }}>
                                     <Row gutter={16}>
                                         <Col span={24} style={{ textAlign: 'start' }}>
-                                            <Typography style={{ fontSize: 20 }}>Product Name</Typography>
-                                            <Typography.Text type='secondary' style={{ fontSize: 20 }}>$10</Typography.Text>
-                                            <p>Beverage</p>
+                                            <Typography style={{ fontSize: 20 }}>{order.orderDetails.$values[0].menuItem.name}</Typography>
+                                            <Typography.Text type='secondary' style={{ fontSize: 20 }}>{order.orderDetails.$values[0].price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Typography.Text>
                                         </Col>
                                     </Row>
                                 </Col>
                                 <Col span={6} style={{ textAlign: 'end' }}>
-                                    <Typography style={{ fontSize: 20 }}>x1</Typography>
+                                    <Typography style={{ fontSize: 20 }}>x{order.orderDetails.$values[0].quantity}</Typography>
                                 </Col>
                             </Row>
-                        )}
-                        <Row gutter={16}>
-                            <Col span={24} style={{ textAlign: 'center' }}>
-                                <Button type='text' onClick={() => setShowAll(!showAll)}>
-                                    {showAll ? 'Show less' : 'Show all'}
-                                </Button>
-                            </Col>
-                        </Row>
-                        <Row gutter={16} style={{ marginTop: 16 }} >
-                            <Col span={20} style={{ textAlign: 'end' }}>
-                                <Typography style={{ fontSize: 20, fontWeight: 200 }}>Total:</Typography>
-                            </Col>
-                            <Col span={4} style={{ textAlign: 'end' }}>
-                                <Typography style={{ fontSize: 20, fontWeight: 600 }}>$10</Typography>
-                            </Col>
-
-                        </Row>
-                        <Divider />
-                    </div>
-                );
-            })}
+                            {showAll === index && order.orderDetails.$values.slice(1).map((item, itemIndex) => (
+                                <Row gutter={16} style={{ marginTop: 16 }} key={itemIndex}>
+                                    <Col span={6}>
+                                        <Image width={120} height={120} src={item.menuItem.imageUrl} />
+                                    </Col>
+                                    <Col span={12} style={{ textAlign: 'start' }}>
+                                        <Row gutter={16}>
+                                            <Col span={24} style={{ textAlign: 'start' }}>
+                                                <Typography style={{ fontSize: 20 }}>{item.menuItem.name}</Typography>
+                                                <Typography.Text type='secondary' style={{ fontSize: 20 }}>{item.price.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Typography.Text>
+                                            </Col>
+                                        </Row>
+                                    </Col>
+                                    <Col span={6} style={{ textAlign: 'end' }}>
+                                        <Typography style={{ fontSize: 20 }}>x{item.quantity}</Typography>
+                                    </Col>
+                                </Row>
+                            ))}
+                            <Row gutter={16}>
+                                <Col span={24} style={{ textAlign: 'center' }}>
+                                    <Button type='text' onClick={() => setShowAll(showAll === index ? null : index)}>
+                                        {showAll === index ? 'Show less' : 'Show all'}
+                                    </Button>
+                                </Col>
+                            </Row>
+                        </>
+                    )}
+                    <Row gutter={16} style={{ marginTop: 16 }}>
+                        <Col span={20} style={{ textAlign: 'end' }}>
+                            <Typography style={{ fontSize: 20, fontWeight: 200 }}>Total:</Typography>
+                        </Col>
+                        <Col span={4} style={{ textAlign: 'end' }}>
+                            <Typography style={{ fontSize: 20, fontWeight: 600 }}>{order.finalAmount.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Typography>
+                        </Col>
+                    </Row>
+                    <Divider />
+                </div>
+            ))}
         </Flex>
     );
 
@@ -98,16 +107,19 @@ const OrderTracking = () => {
 
             <Tabs defaultActiveKey="1" centered onChange={key => setActiveKey(key)}>
                 <TabPane tab="Wait for pending" key="1">
-                    {renderOrders('Wait for pending')}
+                    {renderOrders('Pending')}
                 </TabPane>
                 <TabPane tab="Is Processing" key="2">
-                    {renderOrders('Is Processing')}
+                    {renderOrders('Processing')}
                 </TabPane>
                 <TabPane tab="Is Delivering" key="3">
                     {renderOrders('Is Delivering')}
                 </TabPane>
                 <TabPane tab="Delivered" key="4">
                     {renderOrders('Delivered')}
+                </TabPane>
+                <TabPane tab="Cancelled" key="5">
+                    {renderOrders('Cancelled')}
                 </TabPane>
             </Tabs>
 

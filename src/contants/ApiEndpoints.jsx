@@ -2,11 +2,12 @@ import { statistic } from "antd/es/theme/internal";
 import AddEmployee from "../pages/admin/Employee/AddEmployee";
 import AddMenuItemCategory from "../pages/admin/MenuItem/AddMenuItemCategory";
 
-const baseURL = 'https://localhost:7035/api/';
+const baseURL = 'https://coffeehub-b2angrfyasfuh7hk.southeastasia-01.azurewebsites.net/api/';
 
 const apiEndpoints = {
     baseURL: baseURL,
     auth: {
+        getCurrentRole: 'Auth/role',
         getDetails: 'Auth/details',
         login: 'Auth/login',
         signup: 'Auth/register',
@@ -48,6 +49,9 @@ const apiEndpoints = {
             getPopular: (limit) => `MenuItem/getPopular?limit=${limit}`,
             getNewest: (limit) => `MenuItem/getNewest?limit=${limit}`,
         },
+        recipe: {
+            getByMenuItemId: (id) => `Recipe/menu-item/${id}`,
+        },
         categories: {
             getAll: 'MenuItemCategory',
             getById: (id) => `MenuItemCategory/${id}`,
@@ -61,6 +65,7 @@ const apiEndpoints = {
         }, 
         order: {
             getById: (id) => `Order/${id}`,
+            getByCustomerId: (id) => `Order/getByCustomerId/${id}`,
             add: 'Order',
             addWithDelivery: 'Order/createWithDelivery',
             update: (id) => `Order/${id}`,
@@ -98,6 +103,9 @@ const apiEndpoints = {
         },
         order: {
             getAll: 'Order',
+            getPendingOrProcessing: 'Order/pendingOrprocessing',
+            getProcessingOrPreparing: 'Order/processingOrpreparing',
+            getReadyOrders: 'Order/ready',
             getById: (id) => `Order/${id}`,
             add: 'Order',
             update: (id) => `Order/${id}`,

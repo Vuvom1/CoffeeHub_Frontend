@@ -1,5 +1,5 @@
 const UserRoles = Object.freeze({
-    ADMIN: 'admin',
+    ADMIN: 'Admin',
     EMPLOYEE: 'Employee',
     CUSTOMER: 'Customer',
     GUEST: 'Guest',

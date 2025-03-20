@@ -170,7 +170,7 @@ const Dashboard = () => {
             </Row>
             <Row style={{ marginBottom: 16 }} gutter={[16, 16]}>
                 <Col span={8}>
-                    <Card>
+                    <Card title="Shift Distribution">
                         <Pie
                             height={400}
                             innerRadius={0.5}
@@ -183,7 +183,7 @@ const Dashboard = () => {
                     </Card>
                 </Col>
                 <Col span={16}>
-                    <Card>
+                    <Card title="Lowest Stock Ingredients">
                         <Bar
                             height={400}
                             data={stockStatistics?.ingredientsWithLowStock?.$values.map((item) => ({ item: item.name, value: item.totalQuantity }))}
@@ -199,7 +199,7 @@ const Dashboard = () => {
 
             <Row gutter={[16, 16]}>
                 <Col span={16}>
-                    <Card>
+                    <Card title="Financial Statistics">
                         <Line
                             height={400}
                             data={periodlyStatistics?.map((item) => ({ key: item.key, value: item.value }))}

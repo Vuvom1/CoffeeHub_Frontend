@@ -72,7 +72,7 @@ class AdminLayout extends React.Component {
                     collapsible
                     collapsed={collapsed}
                     onCollapse={this.onCollapse}
-                    style={siderStyle}
+                    style={siderStyle}   
                 >
                     <SiderMenu />
                 </Sider>

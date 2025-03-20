@@ -7,6 +7,9 @@ import apiEndpoints from '../../../contants/ApiEndpoints';
 import apiInstance from '../../../services/api';
 import { message } from 'antd';
 import orderStatus from '../../../contants/OrderStatus';
+import { useSelector } from 'react-redux';
+import UserRoles from '../../../contants/UserRoles';
+import EmployeePosition from '../../../contants/EmployeePosition';
 
 const { SubMenu } = Menu;
 
@@ -15,12 +18,10 @@ const { SubMenu } = Menu;
 const Order = () => {
     const navigate = useNavigate();
     const {message} = App.useApp();
+    const user = useSelector(state => state.auth.user);
 
     const [orders, setOrders] = useState([]);
 
-    const [isModalAddOrderVisible, setIsModalAddOrderVisible] = useState(false);
-    const [isModalEditOrderVisible, setIsModalEditOrderVisible] = useState(false);
-    const [isModalAddCategoryVisible, setIsModalAddCategoryVisible] = useState(false);
     const [current, setCurrent] = useState('mail');
     
     const navigateOrderDetail = (orderId) => {
@@ -97,11 +98,35 @@ const Order = () => {
     ];
 
     const fetchOrders = async () => {
-        await apiInstance.get(apiEndpoints.admin.order.getAll).then((response) => {
-            setOrders(response.data.$values);
-        }).catch((error) => {
-            message.error(error.response.data);
-        });
+        if (user.role == UserRoles.ADMIN) {
+            await apiInstance.get(apiEndpoints.admin.order.getAll).then((response) => {
+                setOrders(response.data.$values);
+            }).catch((error) => {
+                message.error(error.response.data);
+            });
+        } else {
+            if (user.position == EmployeePosition.CASHIER) {
+                await apiInstance.get(apiEndpoints.admin.order.getPendingOrProcessing).then((response) => {
+                    setOrders(response.data.$values);
+                }).catch((error) => {
+                    message.error(error.response.data);
+                });
+            }
+            if (user.position == EmployeePosition.BARISTA) {
+                await apiInstance.get(apiEndpoints.admin.order.getProcessingOrPreparing).then((response) => {
+                    setOrders(response.data.$values);
+                }).catch((error) => {
+                    message.error(error.response.data);
+                });
+            }
+            if (user.position == EmployeePosition.WAITER) {
+                await apiInstance.get(apiEndpoints.admin.order.getReadyOrders).then((response) => {
+                    setOrders(response.data.$values);
+                }).catch((error) => {
+                    message.error(error.response.data);
+                });
+            }
+        }
     }
 
     const handleClick = e => {
@@ -149,24 +174,6 @@ const Order = () => {
                 <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>Order Management</Typography.Title>
                     <Button type="primary" onClick={handleNavigateCreateOrder}>Add Order</Button>
-                </Flex>
-                <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <Menu
-                        onClick={handleClick}
-                        selectedKeys={[current]}
-                        mode="horizontal"
-                        style={{ justifyContent: 'flex-start' }}
-                    >
-                        <SubMenu key="sub1" title="Category 1">
-
-                        </SubMenu>
-                        <SubMenu key="sub2" title="Category 2">
-
-                        </SubMenu>
-                        <SubMenu key="sub3" title="Category 3">
-
-                        </SubMenu>
-                    </Menu>
                 </Flex>
             </Flex>
             <Table

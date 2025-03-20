@@ -10,11 +10,13 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginRequest, loginSuccess } from '../../store/actions/authActions';
 import UserRoles from '../../contants/UserRoles';
+import { useSelector } from 'react-redux';
 
 const Login = () => {
     const {message} = App.useApp();
     const navigate = useNavigate();
     const dispatch = useDispatch();
+    const user = useSelector(state => state.auth.user);
 
     const onFinish = async (values) => {
         dispatch(loginRequest());
@@ -30,9 +32,12 @@ const Login = () => {
             } else {
                 if (response.data.userRole === UserRoles.CUSTOMER) {
                     navigate(endpoints.customer.base);
-                }
-                else {
-                    navigate(endpoints.admin.menuItem);
+                } if (response.data.userRole === UserRoles.EMPLOYEE) {
+                    navigate(endpoints.admin.order);
+                } else if (response.data.userRole === UserRoles.ADMIN) {
+                    navigate(endpoints.admin.dashboard);
+                } else {
+                    navigate(endpoints.customer.base);
                 }
             }
         }

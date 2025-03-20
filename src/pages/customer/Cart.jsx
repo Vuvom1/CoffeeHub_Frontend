@@ -16,7 +16,6 @@ const Cart = () => {
 
     const handleQuantityChange = (value, key) => {
         dispatch(updateQuantity({ key, quantity: value }));
-        console.log(cartItems);
     };
 
     const handleRemove = (itemId) => {
@@ -35,7 +34,7 @@ const Cart = () => {
                     cartItems.map((item, index) => (
                         <Row key={index} style={{ marginBottom: 16 }}>
                             <Col span={6}>
-                                <Image height={150} width={150} src={item.imageUrl} />
+                                <Image height={'100%'} width={'100%'} src={item.imageUrl} />
                             </Col>
                             <Col span={17} offset={1} style={{ textAlign: 'start' }}>
                                 <Row gutter={16} justify={'space-between'}>
@@ -49,7 +48,6 @@ const Cart = () => {
                                 <Row gutter={16}>
                                     <Typography.Text style={{ fontSize: 16, fontWeight: 300 }}>{item.description}</Typography.Text>
                                 </Row>
-
                                 <Row gutter={16} style={{ marginTop: 10, justifyContent: 'end' }}>
                                     <ButtonGroup>
                                         <Button disabled={item.quantity <= 0} onClick={() => handleQuantityChange(item.quantity - 1, item.key)}>-</Button>

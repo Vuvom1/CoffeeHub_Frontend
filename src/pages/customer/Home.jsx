@@ -49,8 +49,8 @@ const Home = () => {
     return (
         <div>
             <Carousel autoplay style={{ width: '100%', height: 'calc(100% - 64px)' }}>
-                <img src="src/assets/banner-1.jpg" alt="Banner 1" />
-                <img src="src/assets/banner-1.jpg" alt="Banner 1" />
+                <img src="src/assets/banner-1.png" alt="Banner 1" />
+                <img src="src/assets/banner-2.png" alt="Banner 1" />
             </Carousel>
 
             <Typography style={{ textAlign: 'center', marginTop: 30, fontStyle: 'italic' }}>What happened here</Typography>
@@ -58,14 +58,14 @@ const Home = () => {
 
             <Row gutter={[20, 20]} style={{ marginTop: 24, marginLeft: '15%', marginRight: '15%' }}>
                 {popularItems.map((item, index) => (
-                    <Col key={index} xs={24} sm={12} md={8} lg={6}>
+                    <Col key={index} sm={12} md={8} lg={6}>
                         <ProductCard item={item} />
                     </Col>
                 ))}
             </Row>
 
             <div style={{ textAlign: 'center', marginTop: 50, position: 'relative' }}>
-                <img src="src/assets/banner-1.jpg" alt="Rectangle" style={{ width: '70%', height: '300px' }} />
+                <img src="src/assets/banner-3.png" alt="Rectangle" style={{ width: '70%', height: '300px' }} />
                 <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
                     <button style={{ fontSize: '16px', cursor: 'pointer' }}>Read More</button>
                 </div>
@@ -76,7 +76,7 @@ const Home = () => {
 
             <Row gutter={[20, 20]} style={{ marginTop: 24, marginLeft: '15%', marginRight: '15%' }}>
                 {newestItems.map((item, index) => (
-                    <Col key={index} xs={24} sm={12} md={8} lg={6}>
+                    <Col key={index} sm={12} md={8} lg={6}>
                         <ProductCard item={item} />
                     </Col>
                 ))}

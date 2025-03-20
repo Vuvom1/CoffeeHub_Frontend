@@ -4,7 +4,7 @@ const endpoints = {
         home: '/coffeehub/home',
         login: '/coffeehub/login',
         signup: '/coffeehub/signup',
-        menuItemDetail: '/coffeehub/menu-item-detail',
+        menuItemDetail: (id) => `/coffeehub/menu-item/${id}`,
         cart: '/coffeehub/cart',
         checkout: '/coffeehub/checkout',
         orderTracking: '/coffeehub/order-tracking',

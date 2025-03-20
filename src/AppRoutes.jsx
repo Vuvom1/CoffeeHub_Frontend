@@ -33,7 +33,6 @@ import Dashboard from './pages/admin/Dashboard/Dashboard';
 const AppRoutes = () => (
   <Router>
     <Routes>
-
       <Route path='/auth' element={<AuthLayout />}>
         <Route path='login' element={<Login />} />
         <Route path='signup' element={<Signup />} />
@@ -47,7 +46,7 @@ const AppRoutes = () => (
         </RequireAuth>
       }>
         <Route index element={<Home />} />
-        <Route path='menuitem/:id' element={<MenuItemDetail />} />
+        <Route path='menu-item/:id' element={<MenuItemDetail />} />
         <Route path='cart' element={<Cart />} />
         <Route path='checkout' element={<Checkout />} />
         <Route path='order-tracking' element={<OrderTracking />} />
@@ -82,7 +81,6 @@ const AppRoutes = () => (
           <Route index element={<Promotion />} />
         </Route>
       </Route>
-
     </Routes>
   </Router>
 );

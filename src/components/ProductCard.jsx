@@ -1,16 +1,19 @@
-import React, {useNavigate} from 'react';
+import React from 'react';
 import { Card, Typography, Rate } from 'antd';
 import endpoints from '../contants/Endpoint';
+import { useNavigate } from 'react-router-dom';
+
 
 const ProductCard = ({ item }) => {
+    const navigate = useNavigate();
 
-
-    // const handleClick = () => {
-    //     navigate(endpoints.customer);
-    // }
+    const handleClick = () => {
+        navigate(endpoints.customer.menuItemDetail(item.id));
+    }
 
     return (
         <Card
+            onClick={handleClick}
             hoverable
             cover={<img style={{padding: 10, paddingBottom: 0}} alt={item.name} src={item.imageUrl} />}
             style={{ width: '100%', height: '100%', border: 'none' }}
