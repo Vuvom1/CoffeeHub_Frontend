@@ -1,6 +1,6 @@
 {
   "name": "coffeehub-frontend",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
   "type": "module",
   "homepage": "https://vuvom1.github.io/CoffeeHub_Frontend/",

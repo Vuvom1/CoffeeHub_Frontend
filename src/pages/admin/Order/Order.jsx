@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Flex, Menu, Modal, Switch, Table, Typography, App, Tag } from 'antd';
+import { Button, Flex, Menu, Modal, Switch, Table, Typography, App, Tag, Row, Input, Col } from 'antd';
 import { SettingOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import endpoints from '../../../contants/Endpoint';
@@ -13,17 +13,16 @@ import EmployeePosition from '../../../contants/EmployeePosition';
 
 const { SubMenu } = Menu;
 
-
-
 const Order = () => {
     const navigate = useNavigate();
-    const {message} = App.useApp();
+    const { message } = App.useApp();
     const user = useSelector(state => state.auth.user);
 
     const [orders, setOrders] = useState([]);
+    const [filteredOrders, setFilteredOrders] = useState([]);
 
-    const [current, setCurrent] = useState('mail');
-    
+    const [current, setCurrent] = useState('all');
+
     const navigateOrderDetail = (orderId) => {
         navigate(endpoints.admin.orderDetail(orderId));
     }
@@ -33,6 +32,7 @@ const Order = () => {
             title: 'ID',
             dataIndex: 'id',
             key: 'id',
+            sorter: (a, b) => a.id - b.id,
         },
         {
             title: 'Date and Time',
@@ -40,16 +40,18 @@ const Order = () => {
             key: 'orderDate',
             render: (text) => {
                 return new Date(text).toLocaleString();
-            }
+            },
+            sorter: (a, b) => new Date(a.orderDate) - new Date(b.orderDate),
         },
-        
+
         {
             title: 'Total Amount',
             dataIndex: 'totalAmount',
             key: 'totalAmount',
             render: (text) => {
                 return text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-            }
+            },
+            sorter: (a, b) => a.totalAmount - b.totalAmount,
         },
         {
             title: 'Final Amount',
@@ -57,12 +59,14 @@ const Order = () => {
             key: 'finalAmout',
             render: (text) => {
                 return text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' });
-            }
+            },
+            sorter: (a, b) => a.finalAmount - b.finalAmount,
         },
         {
             title: 'Card Number',
             dataIndex: 'orderCardNumber',
             key: 'orderCardNumber',
+            sorter: (a, b) => a.orderCardNumber - b.orderCardNumber,
         },
         {
             title: 'Status',
@@ -83,14 +87,15 @@ const Order = () => {
                     default:
                         return <Tag color='orange'>{text}</Tag>
                 }
-            }
+            },
+            sorter: (a, b) => a.status - b.status,
         },
         {
             key: 'action',
             render: (text, record) => (
                 <Flex justify="center">
                     <Button type="link">
-                        <SettingOutlined onClick={()=>navigateOrderDetail(record.id)} />
+                        <SettingOutlined onClick={() => navigateOrderDetail(record.id)} />
                     </Button>
                 </Flex>
             ),
@@ -129,53 +134,40 @@ const Order = () => {
         }
     }
 
-    const handleClick = e => {
-        console.log('click ', e);
-        setCurrent(e.key);
-    };
-
     const handleNavigateCreateOrder = () => {
-        console.log('navigate to create order');    
+        console.log('navigate to create order');
         navigate(endpoints.admin.createOrder);
     }
-
-    const showModalAddOrder = () => {
-        setIsModalAddOrderVisible(true);
-    };
-
-    const showModalEditOrder = () => {
-        setIsModalEditOrderVisible(true);
-    };
-
-    const showModalAddCategory = () => {
-        setIsModalAddCategoryVisible(true);
-    };
-
-    const handleOk = () => {
-        setIsModalAddOrderVisible(false);
-        setIsModalEditOrderVisible(false);
-        setIsModalAddCategoryVisible(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalAddOrderVisible(false);
-        setIsModalEditOrderVisible(false);
-        setIsModalAddCategoryVisible(false);
-    };
 
     useEffect(() => {
         fetchOrders();
     }
-    , []);
+        , []);
 
     return (
         <>
             <Flex vertical style={{ justifyContent: 'space-between', alignItems: 'start' }}>
                 <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>Order Management</Typography.Title>
-                    <Button type="primary" onClick={handleNavigateCreateOrder}>Add Order</Button>
+                    <Button size='large' type="primary" onClick={handleNavigateCreateOrder}>Add Order</Button>
                 </Flex>
             </Flex>
+            <Row style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <Input.Search
+                        styles={{ width: '60%' }}
+                        placeholder="Search orders"
+                    />
+            </Row>
+            <Row style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                <Menu selectedKeys={[current]} mode="horizontal" style={{ width: '100%' }}>
+                    <Menu.Item key="all">All</Menu.Item>
+                    <Menu.Item key={orderStatus.Pending}>Pending</Menu.Item>
+                    <Menu.Item key={orderStatus.Preparing}>Preparing</Menu.Item>
+                    <Menu.Item key={orderStatus.ReadyForPickup}>Ready For Pickup</Menu.Item>
+                    <Menu.Item key={orderStatus.Completed}>Completed</Menu.Item>
+                    <Menu.Item key={orderStatus.Cancelled}>Cancelled</Menu.Item>
+                </Menu>
+            </Row>
             <Table
                 scroll={{ y: '60vh' }}
                 sticky={true}

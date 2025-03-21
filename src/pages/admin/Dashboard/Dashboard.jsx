@@ -40,26 +40,7 @@ const Dashboard = () => {
     const [endDate, setEndDate] = useState(now.toISOString());
     
 
-    const handleSelectPeriod = (value) => {
-        setPeriod(value);
-        
-        switch (value) {
-            case 'daily':
-                setStartDate(startOfDay.toISOString());
-                setEndDate(now.toISOString());
-                break;
-            case 'monthly':
-                setStartDate(startOfMonth.toISOString());
-                setEndDate(now.toISOString());
-                break;
-            case 'yearly':
-                setStartDate(startOfYear.toISOString());
-                setEndDate(now.toISOString());
-                break;
-            default:
-                break;
-        }
-    }
+    
 
     const fetchFinancialStatistics = async () => {
         console.log(startDate, endDate);
@@ -115,6 +96,34 @@ const Dashboard = () => {
         });
     }
 
+    const handleSelectPeriod = (value) => {
+        setPeriod(value);
+        
+        switch (value) {
+            case 'daily':
+                setStartDate(startOfDay.toISOString());
+                setEndDate(now.toISOString());
+                break;
+            case 'monthly':
+                setStartDate(startOfMonth.toISOString());
+                setEndDate(now.toISOString());
+                break;
+            case 'yearly':
+                setStartDate(startOfYear.toISOString());
+                setEndDate(now.toISOString());
+                break;
+            default:
+                break;
+            
+                fetchFinancialStatistics();
+                fetchSheduleStatistics();
+                fetchStockStatistics();
+                fetchPeriodlyStatistics();
+                fetchPopularItems();
+                fetchLeastPopularItems();
+        }
+    }
+
     useEffect(() => {
         handleSelectPeriod('daily');
     }, []);
@@ -127,7 +136,7 @@ const Dashboard = () => {
         fetchPopularItems();
         fetchLeastPopularItems();
     }
-        , [startDate, endDate]);
+        , []);
     useState(() => {
         fetchPeriodlyStatistics();
     }, [period]);

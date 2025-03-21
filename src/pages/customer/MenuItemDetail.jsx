@@ -46,7 +46,6 @@ const MenuItemDetail = () => {
 
     const handleQuantityChange = (value) => {
         const key = cartItems.findIndex(item => item.id === id);
-        console.log(item.quantity);
         dispatch(updateQuantity({ key: item.key, quantity: value }));
     };
 
@@ -84,7 +83,7 @@ const MenuItemDetail = () => {
                     <Flex align='middle' style={{ marginTop: '6%' }}>
                         {
                             item ? (<>
-                                <Button disabled={item.quantity <= 0} onClick={() => handleQuantityChange(item.quantity - 1)} style={{ marginRight: '10px' }}>-</Button>
+                                <Button disabled={item.quantity <= 1} onClick={() => handleQuantityChange(item.quantity - 1)} style={{ marginRight: '10px' }}>-</Button>
                                 <Typography.Text style={{ fontSize: 20 }}>{item.quantity ?? 0}</Typography.Text>
                                 <Button onClick={() => handleQuantityChange(item.quantity + 1)} style={{ marginLeft: '10px' }}>+</Button>
                                 <Button onClick={() => handleRemove(item.id)} style={{ marginLeft: '20px' }}>Remove</Button>

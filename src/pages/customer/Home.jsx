@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Carousel, Rate, Slider, Typography } from 'antd';
+import { Carousel, Rate, Slider, Typography, Image } from 'antd';
 import { Row, Col, Card } from 'antd';
 import { Footer } from 'antd/es/layout/layout';
 import ProductCard from '../../components/ProductCard';
@@ -49,8 +49,8 @@ const Home = () => {
     return (
         <div>
             <Carousel autoplay style={{ width: '100%', height: 'calc(100% - 64px)' }}>
-                <img src="src/assets/banner-1.png" alt="Banner 1" />
-                <img src="src/assets/banner-2.png" alt="Banner 1" />
+                <Image preview={false} src="https://firebasestorage.googleapis.com/v0/b/martialartconnect.appspot.com/o/banners%2Fbanner-1.png?alt=media&token=6f2efe4d-bccd-430f-8fef-48bf35c9b39b" alt="Banner 1" />
+               <Image preview={false} src="https://firebasestorage.googleapis.com/v0/b/martialartconnect.appspot.com/o/banners%2Fbanner-2.png?alt=media&token=523127e6-0e18-4534-9db5-b2e833f125c9" alt="Banner 2" />
             </Carousel>
 
             <Typography style={{ textAlign: 'center', marginTop: 30, fontStyle: 'italic' }}>What happened here</Typography>
@@ -65,10 +65,7 @@ const Home = () => {
             </Row>
 
             <div style={{ textAlign: 'center', marginTop: 50, position: 'relative' }}>
-                <img src="src/assets/banner-3.png" alt="Rectangle" style={{ width: '70%', height: '300px' }} />
-                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>
-                    <button style={{ fontSize: '16px', cursor: 'pointer' }}>Read More</button>
-                </div>
+                <Image preview={false} src="https://firebasestorage.googleapis.com/v0/b/martialartconnect.appspot.com/o/banners%2Fbanner-3.png?alt=media&token=039af74b-1555-4d2f-b589-726d2d628677" alt="Banner 3" style={{ width: '100%', height: 'auto' }} />
             </div>
 
             <Typography  style={{ textAlign: 'center', marginTop: 30, fontStyle: 'italic', color: '#854836' }}>What happened here</Typography>

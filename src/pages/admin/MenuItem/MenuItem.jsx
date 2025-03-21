@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useState } from 'react';
-import {App, Button, Flex, Form, Menu, Modal, Switch, Table, Typography, Select, Input, InputNumber, message } from 'antd';
-import { MoreOutlined, ReadFilled } from '@ant-design/icons';
+import {App, Button, Flex, Form, Menu, Modal, Switch, Table, Typography, Select, Input, InputNumber, message, Row, Col } from 'antd';
+import { EditOutlined, MoreOutlined, PlusCircleOutlined, ReadFilled } from '@ant-design/icons';
 import AddMenuItem from './AddMenuItem';
 import AddMenuItemCategory from './AddMenuItemCategory';
 import apiInstance from '../../../services/api';    
@@ -16,7 +16,9 @@ const MenuItem = () => {
     const [isModalAddCategoryVisible, setIsModalAddCategoryVisible] = useState(false);
     const [modalMenuItemRecipe, setModalMenuItemRecipe] = useState(null);
 
-    const [current, setCurrent] = useState('All');
+    const [currentCategory, setCurrentCategory] = useState('all');
+    const [filteredMenuItems, setFilteredMenuItems] = useState([]);
+
     const [menuItems, setMenuItems] = useState([]);
     const {message} = App.useApp();
 
@@ -30,6 +32,7 @@ const MenuItem = () => {
     const fetchMenuItems = async () => {
         await apiInstance.get(apiEndpoint.admin.menuItem.getAll).then((response) => {
             setMenuItems(response.data.$values);
+            setFilteredMenuItems(response.data.$values);
         });
     }
 
@@ -52,12 +55,14 @@ const MenuItem = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            sorter: (a, b) => a.name.localeCompare(b.name), 
         },
         {
             title: 'Price',
             dataIndex: 'price',
             key: 'price',
             render: (text) => <Typography.Text>{text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</Typography.Text>,
+            sorter: (a, b) => a.price - b.price,
         },
         {
             title: 'Available',
@@ -66,24 +71,39 @@ const MenuItem = () => {
             render: (text, record) => <Switch checkedChildren="Yes" onChange={ 
                 () => updateAvailability(record.id)
              } unCheckedChildren="No" defaultChecked={text} />,
+            sorter: (a, b) => a.isAvailable - b.isAvailable,
         },
         {
             key: 'action',
             render: (text, record) => (
                 <Flex justify="center">
-                    <Button type="link" onClick={() => {setModalEditMenuItemId(record.id)}}>
-                        <MoreOutlined />
+                    <Button type='outlined' onClick={() => setModalMenuItemRecipe(record)}><ReadFilled/></Button> 
+
+                    <Button type="outlined" onClick={() => {setModalEditMenuItemId(record.id)}}>
+                        <EditOutlined />
                     </Button>
-                    <Button type='link' onClick={() => setModalMenuItemRecipe(record)}><ReadFilled/></Button> 
                 </Flex>
             ),
         }
     ];
 
-    const handleClick = e => {
-        console.log('click ', e);
-        setCurrent(e.key);
+    const handleChangeCurrentCategory = (category) => {
+        setCurrentCategory(category);
+        
+        if (category === 'all') {
+            setFilteredMenuItems(menuItems);
+        } else {
+            setFilteredMenuItems(menuItems.filter((item) => item.menuItemCategoryId === category));
+        }
     };
+
+    const handleSearch = (value) => {
+        if (value === '') {
+            setFilteredMenuItems(menuItems);
+        } else {
+            setFilteredMenuItems(menuItems.filter((item) => item.name.toLowerCase().includes(value.toLowerCase())));
+        }
+    }
 
     const showModalAddMenuItem = () => {
         setIsModalAddMenuItemVisible(true);
@@ -118,12 +138,18 @@ const MenuItem = () => {
             <Flex vertical style={{ justifyContent: 'space-between', alignItems: 'start' }}>
                 <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>Menu Item</Typography.Title>
-                    <Button type="primary" onClick={showModalAddMenuItem}>Add Item</Button>
+                    <Button size='large' type="primary" onClick={showModalAddMenuItem}><PlusCircleOutlined/>Add Item</Button>
                 </Flex>
-                <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <Menu
-                        onClick={handleClick}
-                        selectedKeys={[current]}
+                <Row style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <Input.Search onSearch={(value)=>handleSearch(value)} placeholder="Search menu items" />
+                </Row>
+                <Row style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                    <Col span={18}>
+                    <Menu 
+                        defaultSelectedKeys={['all']}
+                        wrap={true}
+                        onClick={(e) => handleChangeCurrentCategory(e.key)}
+                        selectedKeys={[currentCategory]}
                         mode="horizontal"
                         style={{ justifyContent: 'flex-start' }}
                     >
@@ -132,14 +158,19 @@ const MenuItem = () => {
                             <Menu.Item key={category.id}>{category.name}</Menu.Item>
                         ))}
                     </Menu>
+                    </Col>
+                    <Col span={6}>
                     <Button type="default" onClick={showModalAddCategory} >Add Category</Button>
-                </Flex>
+                    </Col>  
+                    
+                    
+                </Row>
 
                 <Table
                     scroll={{ y: '60vh' }}
                     sticky={true}
                     style={{ width: '100%' }}
-                    dataSource={menuItems}
+                    dataSource={filteredMenuItems}
                     columns={columns}
                     pagination={{}} />
             </Flex>

@@ -3,6 +3,7 @@ import AddEmployee from "../pages/admin/Employee/AddEmployee";
 import AddMenuItemCategory from "../pages/admin/MenuItem/AddMenuItemCategory";
 
 const baseURL = 'https://coffeehub-b2angrfyasfuh7hk.southeastasia-01.azurewebsites.net/api/';
+// const baseURL = 'http://localhost:5264/api/';
 
 const apiEndpoints = {
     baseURL: baseURL,
@@ -94,6 +95,7 @@ const apiEndpoints = {
             getById: (id) => `Employee/${id}`,
             add: 'Employee',
             update: (id) => `Employee/${id}`,
+            updateRole: (id) => `Employee/${id}/role`,
         },
         customer: {
             getAll: 'Customer',

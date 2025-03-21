@@ -62,7 +62,7 @@ const Checkout = () => {
             dispatch(clearCart());
             navigate(endpoints.customer.base);
         }).catch(error => {
-            console.log(error);
+            message.error(error.response.data.detailed)
         });
     }
 

@@ -16,16 +16,20 @@ const CustomerVerify = () => {
     const onFinish = async (values) => {
         setOnSaving(true);
         values.authId = userId;
-
+    
         const response = await axiosInstance.post(apiEndpoints.customer.verifyCustomer, values).then((response) => {
-            message.success("Verification successful");
-            navigate(endpoints.customer.base);
-        }
-        ).catch((error) => {
+            axiosInstance.post(apiEndpoints.auth.login, values).then((response) => {
+                dispatch(loginSuccess(response.data.token));
+                message.success(response.data);
+                navigate(endpoints.customer.base);
+            }).catch((error) => {
+                message.error(error.response.data)
+                console.log(error.response);
+            });
+        }).catch((error) => {
             message.error(error.response.data)
             console.log(error.response);
-        }
-        ).finally(() => {
+        }).finally(() => {
             setOnSaving(false);
         });
     };

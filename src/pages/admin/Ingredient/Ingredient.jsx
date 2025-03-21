@@ -1,13 +1,11 @@
-import React, { useEffect } from 'react';
-import { useState } from 'react';
-import { App, Button, Flex, Tabs, Menu, Modal, Switch, Table, Typography, Select, Image } from 'antd';
-import { ImportOutlined, SettingOutlined } from '@ant-design/icons';
+import React, { useEffect, useState } from 'react';
+import { App, Button, Flex, Tabs, Menu, Modal, Switch, Table, Typography, Select, Image, Row, Col, Input } from 'antd';
+import { EditOutlined, ImportOutlined, SettingOutlined, MoreOutlined, PlusCircleOutlined } from '@ant-design/icons';
 import apiInstance from '../../../services/api';
 import apiEndpoints from '../../../contants/ApiEndpoints';
 import AddIngredientCategory from './AddIngredientCategory';
 import AddIngredient from './AddIngredient';
 import EditIngredient from './EditIngredient';
-import { MoreOutlined } from '@ant-design/icons';
 import AddIngredientStocks from './AddIngredientStocks';
 import AddIngredientStock from './AddIngredientStock';
 import IngredientStock from './IngredientStock';
@@ -17,24 +15,20 @@ const { TabPane } = Tabs;
 const Ingredient = () => {
     const [ingredientCategories, setIngredientCategories] = useState([]);
     const [ingredients, setIngredients] = useState([]);
-    const [loading, setLoading] = useState(false);
-
+    const [filteredIngredients, setFilteredIngredients] = useState([]);
     const [isModalAddIngredientVisible, setIsModalAddIngredientVisible] = useState(false);
     const [modalEditIngredientId, setEditIngredientId] = useState(null);
     const [isModalAddCategoryVisible, setIsModalAddCategoryVisible] = useState(false);
     const [modalAddIngredientStockId, setModalAddIngredientStockId] = useState(null);
-
     const [selectedIngredients, setSelectedIngredients] = useState([]);
-
-    const [current, setCurrent] = useState('mail');
+    const [currentCategory, setCurrentCategory] = useState('all');
+    const [searchValue, setSearchValue] = useState('');
     const { message } = App.useApp();
 
+    const [loadingIngredients, setLoadingIngredients] = useState(false);
+    const [loadingCategories, setLoadingCategories] = useState(false);
+
     const columns = [
-        // {
-        //     key: 'id',
-        //     dataIndex: 'id',
-        //     title: 'ID',
-        // },
         {
             key: 'imageUrl',
             dataIndex: 'imageUrl',
@@ -44,30 +38,34 @@ const Ingredient = () => {
             key: 'name',
             title: 'Name',
             dataIndex: 'name',
+            sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
             key: 'ingredientCategoryName',
             title: 'Category',
             dataIndex: 'ingredientCategoryName',
+            sorter: (a, b) => a.ingredientCategoryName.localeCompare(b.ingredientCategoryName),
         },
         {
             key: 'totalQuantity',
             title: 'In Stock',
-            dataIndex: 'totalQuantity'
+            dataIndex: 'totalQuantity',
+            sorter: (a, b) => a.totalQuantity - b.totalQuantity,
         },
         {
             key: 'unitOfMeasurement',
             title: 'Unit',
             dataIndex: 'unitOfMeasurement',
+            sorter: (a, b) => a.unitOfMeasurement.localeCompare(b.unitOfMeasurement),
         },
         {
             key: 'action',
             render: (text, record) => (
                 <Flex justify="center">
-                    <Button type="link" onClick={() => { setEditIngredientId(record.id) }}>
-                        <MoreOutlined />
+                    <Button type="outlined" onClick={() => { setEditIngredientId(record.id) }}>
+                        <EditOutlined />
                     </Button>
-                    <Button type="link" onClick={() => { setModalAddIngredientStockId(record.id) }}>
+                    <Button type="outlined" onClick={() => { setModalAddIngredientStockId(record.id) }}>
                         <ImportOutlined />
                     </Button>
                 </Flex>
@@ -76,34 +74,32 @@ const Ingredient = () => {
     ];
 
     const fetchIngredientCategories = async () => {
+        setLoadingCategories(true);
         await apiInstance.get(apiEndpoints.admin.ingredientCategory.getAll).then((response) => {
             setIngredientCategories(response.data.$values);
-        }
-        ).catch((error) => {
+        }).catch((error) => {
             message.error('Failed to fetch ingredient categories');
+        }).finally(() => {  
+            setLoadingCategories(false);
         });
     }
 
     const fetchIngredients = async () => {
+        setLoadingIngredients(true);
         await apiInstance.get(apiEndpoints.admin.ingredient.getAll).then((response) => {
             setIngredients(response.data.$values);
-        }
-        ).catch((error) => {
+            setFilteredIngredients(response.data.$values);
+        }).catch((error) => {
             message.error('Failed to fetch ingredients');
+        }).finally(() => {
+            setLoadingIngredients(false);
         });
     }
 
-    const openIngredientImport = () => {
-
-        setIsModalAddIngredientStockVisible(true);
-        console.log(selectedIngredients);
-        // ajax request after empty completing
-        // setTimeout(() => {
-        //     setSelectedIngredients([]);
-        //     setLoading(false);
-        // }, 1000);
-
-    };
+    // const openIngredientImport = () => {
+    //     setIsModalAddIngredientVisible(true);
+    //     console.log(selectedIngredients);
+    // };
 
     const rowSelection = {
         selectedIngredients,
@@ -114,9 +110,28 @@ const Ingredient = () => {
 
     const hasSelected = selectedIngredients.length > 0;
 
-    const handleClick = e => {
-        console.log('click ', e);
-        setCurrent(e.key);
+    const handleSelectCategory = (e) => {
+        setCurrentCategory(e.key);
+        filterIngredients(e.key, searchValue);
+    };
+
+    const handleSearch = (value) => {
+        setSearchValue(value);
+        filterIngredients(currentCategory, value);
+    };
+
+    const filterIngredients = (category, search) => {
+        let filtered = ingredients;
+
+        if (category !== 'all') {
+            filtered = filtered.filter((ingredient) => ingredient.ingredientCategoryId === category);
+        }
+
+        if (search) {
+            filtered = filtered.filter((ingredient) => ingredient.name.toLowerCase().includes(search.toLowerCase()));
+        }
+
+        setFilteredIngredients(filtered);
     };
 
     const showModalAddIngredient = () => {
@@ -132,6 +147,9 @@ const Ingredient = () => {
         setEditIngredientId(null);
         setIsModalAddCategoryVisible(false);
         setModalAddIngredientStockId(null);
+
+        fetchIngredientCategories();
+        fetchIngredients();
     };
 
     const handleCancel = () => {
@@ -144,8 +162,7 @@ const Ingredient = () => {
     useEffect(() => {
         fetchIngredientCategories();
         fetchIngredients();
-    }
-        , []);
+    }, []);
 
     return (
         <>
@@ -155,19 +172,32 @@ const Ingredient = () => {
                         <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                             <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>Ingredients</Typography.Title>
                             <Flex gap={10}>
-                                <Button type="primary" disabled={!hasSelected} onClick={openIngredientImport} loading={loading}>
+                                {/* <Button type="primary" disabled={!hasSelected} onClick={openIngredientImport}>
                                     Import ingredients
-                                </Button>
-                                <Button type="primary" onClick={showModalAddIngredient}>Add Ingredient</Button>
+                                </Button> */}
+                                <Button size='large' type="primary" onClick={showModalAddIngredient}><PlusCircleOutlined/> Ingredient</Button>
                             </Flex>
                         </Flex>
-                        <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                            <Menu
-                                onClick={handleClick}
-                                selectedKeys={[current]}
+                        <Row style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <Col span={18}>
+                                <Input.Search onSearch={handleSearch} placeholder="Search ingredients" />
+                            </Col>
+                            <Col span={6}>
+                                
+                            </Col>
+                        </Row>
+                        <Row style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                            <Col span={18}>
+                            <Menu 
+                                loading={loadingCategories}
+                                defaultSelectedKey={"all"}
+                                wrap={true}
+                                onClick={handleSelectCategory}
+                                selectedKeys={[currentCategory]}
                                 mode="horizontal"
                                 style={{ justifyContent: 'flex-start' }}
                             >
+                                <Menu.Item key="all">All</Menu.Item>
                                 {
                                     ingredientCategories.map((category) => {
                                         return (
@@ -178,15 +208,19 @@ const Ingredient = () => {
                                     })
                                 }
                             </Menu>
-                            <Button type="default" onClick={showModalAddCategory} >Add Category</Button>
-                        </Flex>
+                            </Col>
+                            <Col span={6} style={{ textAlign: 'end' }}>
+                            <Button type="default" onClick={showModalAddCategory} ><PlusCircleOutlined/>Category</Button>
+                            </Col>
+                        </Row>
                     </Flex>
                     <Table
+                        loading={loadingIngredients}
                         rowSelection={rowSelection}
                         scroll={{ y: '60vh' }}
                         sticky={true}
                         style={{ width: '100%' }}
-                        dataSource={ingredients}
+                        dataSource={filteredIngredients}
                         columns={columns}
                         pagination={{}} />
 

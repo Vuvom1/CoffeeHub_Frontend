@@ -10,15 +10,29 @@ import endpoints from '../../contants/Endpoint';
 const { Option } = Select;
 
 const EmployeeVerify = () => {
-    const navigate = useNavigate(); 
+    const navigate = useNavigate();
     const user = useSelector((state) => state.auth.user);
     const userId = user ? user.nameid : null;
 
     const onFinish = async (values) => {
         values.authId = userId;
 
-        const response = await axiosInstance.post(apiEndpoints.admin.employee.add, values).then((response) => {
-            message.success("Login successful");
+        await axiosInstance.post(apiEndpoints.admin.employee.add, values).then(async (response) => {
+            await axiosInstance.post(apiEndpoints.auth.login, values).then((response) => {
+                dispatch(loginSuccess(response.data.token));
+
+                if (response.data.userRole === UserRoles.EMPLOYEE) {
+                    navigate(endpoints.admin.order);
+                } else if (response.data.userRole === UserRoles.ADMIN) {
+                    navigate(endpoints.admin.dashboard);
+                }
+                message.success(response.data);
+            }
+            ).catch((error) => {
+                message.error(error.response.data.detailed)
+                console.log(error.response.data);
+            }
+            );
             navigate(endpoints.admin.menuItem);
         }
         ).catch((error) => {
@@ -58,7 +72,7 @@ const EmployeeVerify = () => {
                     rules={[{ required: true, message: 'Please input your phone number!' }]}
                 >
                     <Input />
-                    </Form.Item>
+                </Form.Item>
                 <Form.Item
                     name="address"
                     label="Address"

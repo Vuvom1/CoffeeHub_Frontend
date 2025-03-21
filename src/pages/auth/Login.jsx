@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Form, Input, Button, Checkbox, Typography, Image, Col, Row, App } from 'antd';
+import { Form, Input, Button, Checkbox, Typography, Image, Col, Row, App, Descriptions } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import Flex from 'antd/lib/flex';
 import loginImage from '../../assets/login-image.jpg';
 import endpoints from '../../contants/Endpoint';
 import axiosInstance from '../../services/api';
 import apiEndpoints from '../../contants/ApiEndpoints';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { loginRequest, loginSuccess } from '../../store/actions/authActions';
 import UserRoles from '../../contants/UserRoles';
@@ -17,8 +17,10 @@ const Login = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const user = useSelector(state => state.auth.user);
+    const [onLogin, setOnLogin] = useState(false);
 
     const onFinish = async (values) => {
+        setOnLogin(true);
         dispatch(loginRequest());
         const response = await axiosInstance.post(apiEndpoints.auth.login, values).then((response) => {
             dispatch(loginSuccess(response.data.token));
@@ -45,6 +47,9 @@ const Login = () => {
             message.error(error.response.data.detailed)
             console.log(error.response.data);
         }
+        ).finally(() => {
+            setOnLogin(false);
+        }
         );
     };
 
@@ -59,7 +64,7 @@ const Login = () => {
     return (
         <Row align='center' style={{ width: '100%', height: '100vh' }}>
             <Col span={12} style={{ height: '100%', width: '100%' }}>
-                <img src={loginImage} alt="Banner 1" style={{ width: '100%', height: '100%' }} />
+                <Image preview={false} src={loginImage} alt="Banner 1" style={{ width: '100%', height: '100%' }} />
             </Col>
             <Col span={12} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: 24 }}>
                 <Form
@@ -97,11 +102,17 @@ const Login = () => {
                         <Button style={{ marginBottom: 10 }} block type="primary" htmlType="submit">
                             Log in
                         </Button>
-                        or <a href={endpoints.auth.signup}>Register now!</a>
+                        or <Link to={endpoints.auth.signup}>register now!</Link>
                     </Form.Item>
-                    <Button onClick={showMessages} style={{ marginTop: 20 }} block type="secondary" htmlType="submit">
+                    <Button onClick={()=>navigate(endpoints.customer.base)} style={{ marginTop: 20 }} block type="secondary">
                         Continue as guest
                     </Button>
+                    <Row justify="start" style={{ marginTop: 20 }}>
+                        <Descriptions title="Demo Admin Account" column={1}>
+                            <Descriptions.Item label="Username">admin</Descriptions.Item>
+                            <Descriptions.Item label="Password">admin123</Descriptions.Item>
+                        </Descriptions>
+                    </Row>
                 </Form>
 
             </Col>

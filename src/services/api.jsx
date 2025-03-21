@@ -42,7 +42,7 @@ axiosInstance.interceptors.response.use(
                     break;
                 case 401:
                     message.error('Unauthorized: Please log in again.');
-                    // window.location.href = endpoints.auth.login;
+                    window.location.href = endpoints.auth.login;
                     break;
                 case 403:
                     message.error('Forbidden: You do not have permission to perform this action.');

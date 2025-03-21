@@ -1,9 +1,7 @@
 import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, BrowserRouter, HashRouter } from 'react-router-dom';
 import Home from './pages/customer/Home';
 import CustomerLayout from './layouts/customer/CustomerLayout';
-import CustomerLogin from './pages/customer/CustomerLogin';
-import CustomerSignup from './pages/customer/CustomerSignup';
 import MenuItemDetail from './pages/customer/MenuItemDetail';
 import Cart from './pages/customer/Cart';
 import Checkout from './pages/customer/Checkout';
@@ -31,8 +29,8 @@ import Promotion from './pages/admin/Promotion/Promotion';
 import Dashboard from './pages/admin/Dashboard/Dashboard';
 
 const AppRoutes = () => (
-  <Router>
-    <Routes>
+  <HashRouter>
+    <Routes>      
       <Route path='/auth' element={<AuthLayout />}>
         <Route path='login' element={<Login />} />
         <Route path='signup' element={<Signup />} />
@@ -40,10 +38,9 @@ const AppRoutes = () => (
         <Route path='customer-verify' element={<CustomerVerify />} />
       </Route>
       {/* Customer Routes */}
+    
       <Route path='/coffeehub' element={
-        <RequireAuth>
           <CustomerLayout />
-        </RequireAuth>
       }>
         <Route index element={<Home />} />
         <Route path='menu-item/:id' element={<MenuItemDetail />} />
@@ -82,7 +79,7 @@ const AppRoutes = () => (
         </Route>
       </Route>
     </Routes>
-  </Router>
+  </HashRouter>
 );
 
 export default AppRoutes;

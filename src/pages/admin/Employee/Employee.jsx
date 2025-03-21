@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Flex, Menu, Modal, Switch, Table, Typography } from 'antd';
+import { Button, Flex, Input, Menu, Modal, Switch, Table, Typography, Row } from 'antd';
 import { MoreOutlined, UserAddOutlined } from '@ant-design/icons';
 import AddEmployee from './AddEmployee';
 import apiEndpoints from '../../../contants/ApiEndpoints';
@@ -14,8 +14,7 @@ const Employee = () => {
     const [employees, setEmployees] = useState([]);
     const [isModalAddEmployeeVisible, setIsModalAddEmployeeVisible] = useState(false);
     const [isModalEditEmployeeVisible, setIsModalEditEmployeeVisible] = useState(false);
-    const [current, setCurrent] = useState('mail');
-
+    const [filteredEmployees, setFilteredEmployees] = useState([]);
     
     const navigateEmployeeProfile = (id) => () => {
         navigate(endpoints.admin.employeeProfile(id));
@@ -26,16 +25,19 @@ const Employee = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            sorter: (a, b) => a.name.localeCompare(b.name),
         },
         {
             title: 'Role',
             dataIndex: 'role',
             key: 'role',
+            sorter: (a, b) => a.role.localeCompare(b.role),
         },
         {
             title: 'Phone Number',
             dataIndex: 'phoneNumber',
             key: 'phoneNumber',
+            sorter: (a, b) => a.phoneNumber.localeCompare(b.phoneNumber),
         },
         {
             title: 'Monthly Salary',
@@ -46,6 +48,7 @@ const Employee = () => {
                     {text.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}  
                 </Flex>
             ),
+            sorter: (a, b) => a.monthlySalary - b.monthlySalary,
         },
         {
             key: 'action',
@@ -62,22 +65,18 @@ const Employee = () => {
     const fetchEmployees = async () => {    
         await apiInstance.get(apiEndpoints.admin.employee.getAll).then((response) => {
             setEmployees(response.data.$values);
+            setFilteredEmployees(response.data.$values);
         }).catch((error) => {
             message.error(error.response.data);
         });
     }
 
-    const handleClick = e => {
-        console.log('click ', e);
-        setCurrent(e.key);
-    };
-
+    const handleSearch = async (value) => {
+        setFilteredEmployees(employees.filter(employee => employee.name.toLowerCase().includes(value.toLowerCase())));
+    }
+    
     const showModalAddEmployee = () => {
         setIsModalAddEmployeeVisible(true);
-    };
-
-    const showModalEditEmployee = () => {
-        setIsModalEditEmployeeVisible(true);
     };
 
     const handleOk = () => {
@@ -96,45 +95,27 @@ const Employee = () => {
 
     return (
         <>
-            <Flex vertical style={{ justifyContent: 'space-between', alignItems: 'start' }}>
+            <Flex 
+                vertical style={{ justifyContent: 'space-between', alignItems: 'start' }}>
                 <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
                     <Typography.Title level={2} style={{ textAlign: 'center', marginBottom: 24 }}>Employee Management</Typography.Title>
                     <Button type="primary" onClick={showModalAddEmployee}><UserAddOutlined />Add Employee</Button>
                 </Flex>
-                <Flex style={{ justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <Menu
-                        onClick={handleClick}
-                        selectedKeys={[current]}
-                        mode="horizontal"
-                        style={{ justifyContent: 'flex-start' }}
-                    >
-                        <SubMenu key="sub1" title="Department 1">
-
-                        </SubMenu>
-                        <SubMenu key="sub2" title="Department 2">
-
-                        </SubMenu>
-                        <SubMenu key="sub3" title="Department 3">
-
-                        </SubMenu>
-                    </Menu>
-                </Flex>
+                <Row gutter={16}> 
+                    <Input.Search placeholder="Search employee" onSearch={(value)=> handleSearch(value)}/>
+                </Row>
             </Flex>
             <Table
                 scroll={{ y: '60vh' }}
                 sticky={true}
-                style={{ width: '100%' }}
-                dataSource={employees}
+                style={{ width: '100%', marginTop: 24 }}
+                dataSource={filteredEmployees}
                 columns={columns}
-                pagination={{}} />
+                pagination={true} />
 
             <Modal title="Add New Employee Account" open={isModalAddEmployeeVisible} footer={null} onOk={handleOk} onCancel={handleCancel}>
                 <AddEmployee onSave={handleOk} />
             </Modal>
-            {/* <Modal title="Edit Employee" open={isModalEditEmployeeVisible} onOk={handleOk} onCancel={handleCancel}>
-                <AddEmployee />
-            </Modal> */}
-
         </>
     );
 };

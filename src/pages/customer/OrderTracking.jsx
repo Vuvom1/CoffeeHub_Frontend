@@ -8,9 +8,15 @@ const { TabPane } = Tabs;
 
 const OrderTracking = () => {
     const [activeKey, setActiveKey] = useState('1');
-    const customerId = useSelector(state => state.auth.user.id);
+    const customerId = useSelector(state => state.auth.user?.id);
     const [orders, setOrders] = useState([]);
     const [showAll, setShowAll] = useState(null);
+
+    if (!customerId) {
+        return <Typography style={{marginTop: 16}}>
+            Please login to see your orders
+        </Typography>
+    }
 
     const fetchOrdersByCustomerId = async () => {
         await apiInstance.get(apiEndpoints.customer.order.getByCustomerId(customerId)).then(response => {
@@ -30,6 +36,8 @@ const OrderTracking = () => {
     const getOrdersByStatus = (status) => {
         return orders.filter(order => order.delivery.status === status);
     };
+
+    
 
     const renderOrders = (status) => (
         <Flex vertical gap={16} >
